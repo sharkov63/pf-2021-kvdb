@@ -2,6 +2,8 @@ import dbfile.*
 import java.io.File
 import kotlin.system.exitProcess
 
+
+
 fun printIncorrectArgsMsg() {
     println("Incorrect arguments. Please use -h or --help option to see help message.")
     exitProcess(1)
@@ -16,13 +18,28 @@ fun printDatabaseNotExistMsg(dbPath: String) {
     exitProcess(1)
 }
 
+fun printCannotReadDataBase(dbPath: String) {
+    println("Cannot read database at \"$dbPath\"!")
+    exitProcess(1)
+}
+
+fun printCannotWriteToDataBase(dbPath: String) {
+    println("Cannot write to database at \"$dbPath\"!")
+    exitProcess(1)
+}
+
 fun printInvalidDatabaseMsg(dbPath: String) {
     println("Database at \"$dbPath\" is not valid!")
     exitProcess(1)
 }
 
 fun printDatabaseNotContainsKey(dbPath: String, key: String) {
-    println("Database at \"$dbPath\" doesn't contain the key \"$key\".")
+    println("Database at \"$dbPath\" doesn't contain the key \"$key\"!")
+    exitProcess(1)
+}
+
+fun printDataBaseAlreadyExists(dbPath: String) {
+    println("Database at \"$dbPath\" already exists! Use -o or --overwrite to allow overwriting the database.")
     exitProcess(1)
 }
 
@@ -30,6 +47,9 @@ fun readKeys(dbFileName: String, keys: List<String>) {
     val dbFile = File(dbFileName)
     if (!dbFile.exists()) {
         return printDatabaseNotExistMsg(dbFile.path)
+    }
+    if (!dbFile.canRead()) {
+        return printCannotReadDataBase(dbFile.path)
     }
     val data = readDatabaseFromFile(dbFile) ?: return printInvalidDatabaseMsg(dbFile.path)
     keys.forEach { key ->
@@ -40,6 +60,17 @@ fun readKeys(dbFileName: String, keys: List<String>) {
     }
 }
 
+fun createDataBase(dbFileName: String, data: Map<String, String>) {
+    val dbFile = File(dbFileName)
+    if (!dbFile.createNewFile()) {
+        return printDataBaseAlreadyExists(dbFile.path)
+    }
+    if (!dbFile.canWrite()) {
+        return printCannotWriteToDataBase(dbFile.path)
+    }
+    writeDatabaseToFile(dbFile, data)
+}
+
 fun parseReadArgs(args: List<String>) {
     if (args.size < 2) return printIncorrectArgsMsg()
     val dbFileName = args[0]
@@ -47,9 +78,24 @@ fun parseReadArgs(args: List<String>) {
     readKeys(dbFileName, args.toList())
 }
 
+fun parseCreateArgs(args: List<String>) {
+    if (args.isEmpty()) return printIncorrectArgsMsg()
+    if (args.size % 2 != 1) return printIncorrectArgsMsg()
+    val dbFileName = args[0]
+    val data: MutableMap<String, String> = mutableMapOf()
+    val kvArgs = args.drop(1)
+    for (i in kvArgs.indices step 2) {
+        val key = kvArgs[i]
+        val value = kvArgs[i + 1]
+        data[key] = value
+    }
+    createDataBase(dbFileName, data.toMap())
+}
+
 fun parseOption(option: String, args: List<String>) {
     when (option) {
         "-r", "--read" -> parseReadArgs(args)
+        "-c", "--create" -> parseCreateArgs(args)
         "-h", "--help" -> printHelpMsg()
         else -> printIncorrectArgsMsg()
     }
