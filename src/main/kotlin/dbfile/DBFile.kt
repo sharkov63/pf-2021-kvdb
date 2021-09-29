@@ -1,17 +1,30 @@
-package io
+package dbfile
 
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 
+/**
+ * This package provides reading of and writing to a file in a custom format.
+ * Files in this format shall have ".db" extension.
+ *
+ * The format is as follows.
+ * The file contains an even number of strings, where each two strings form a (key, value) pair:
+ * KEY1 VALUE1 KEY2 VALUE2 ...
+ * Each string starts with a 32-byte integer N, which declares the length of the string.
+ * Then, N next bytes decode the string.
+ */
 
 
+// Conversion
 fun intToFourBytes(x: Int) = byteArrayOf(x.toByte(), (x shr 8).toByte(), (x shr 16).toByte(), (x shr 24).toByte())
+
 fun fourBytesToInt(bytes: ByteArray): Int {
     assert(bytes.size == 4)
     return bytes[0].toInt() or (bytes[1].toInt() shl 8) or (bytes[2].toInt() shl 16) or (bytes[3].toInt() shl 24)
 }
 
+// Write
 fun writeIntAsFourBytes(stream: OutputStream, x: Int) {
     stream.write(intToFourBytes(x))
 }
@@ -31,6 +44,7 @@ fun writeDatabaseToFile(file: File, data: Map<String, String>) {
     stream.close()
 }
 
+// Read
 fun readInt(stream: InputStream): Int? {
     val bytes = stream.readNBytes(4)
     return if (bytes.size == 4)

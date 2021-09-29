@@ -1,11 +1,11 @@
 import java.io.File
 import kotlin.test.*
-import io.*
+import dbfile.*
 
-internal class IOTests {
+internal class DBFileTests {
     private val filename = "testData/io/testDatabase.db"
 
-    private fun ioTestTemplate(data: Map<String, String>) {
+    private fun dbFileTestTemplate(data: Map<String, String>) {
         val file = File(filename)
         writeDatabaseToFile(file, data)
         val readedData = readDatabaseFromFile(file)
@@ -20,7 +20,7 @@ internal class IOTests {
             "zero" to "0",
             "one" to "1",
         )
-        ioTestTemplate(data)
+        dbFileTestTemplate(data)
     }
 
     @Test
@@ -29,13 +29,13 @@ internal class IOTests {
             "" to "emptyString",
             "empty string" to "",
         )
-        ioTestTemplate(data)
+        dbFileTestTemplate(data)
     }
 
     @Test
     fun emptyDataBase() {
         val data: Map<String, String> = mapOf()
-        ioTestTemplate(data)
+        dbFileTestTemplate(data)
     }
 
     @Test
@@ -44,7 +44,7 @@ internal class IOTests {
             "!\"#$%&'()*+,-./:;<=>?" to "@[\\]^_`{|}~",
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ" to "abcdefghijklmnopqrstuvwxyz",
         )
-        ioTestTemplate(data)
+        dbFileTestTemplate(data)
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class IOTests {
             "¡¢£¤¥¦§¨©ª«¬\u00AD®¯°±²³´µ¶·¸¹º»¼½¾¿" to "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜ",
             "ÝÞßàáâãäåæçèéêëìíîï" to "ðñòóôõö÷øùúûüýþÿ",
         )
-        ioTestTemplate(data)
+        dbFileTestTemplate(data)
     }
 
     @Test
@@ -64,7 +64,7 @@ internal class IOTests {
             "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" to "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
             "Ѐ Ё Ђ Ѓ Є Ѕ І Ї Ј Љ Њ Ћ Ќ Ѝ Ў Џ" to "ѐ ё ђ ѓ є ѕ і ї ј љ њ ћ ќ ѝ ў џ",
         )
-        ioTestTemplate(data)
+        dbFileTestTemplate(data)
     }
 
     @Test
@@ -74,6 +74,6 @@ internal class IOTests {
             "㌲ ㌳ ㌴ ㌵ ㌶ ㌷ ㌸ ㌹ ㌺ ㌻ ㌼ ㌽ ㌾ ㌿ ㍀ ㍁ ㍂ ㍃ ㍄ ㍅ ㍆ ㍇ ㍈ ㍉ ㍊" to "㍋ ㍌ ㍍ ㍎ ㍏ ㍐ ㍑ ㍒ ㍓ ㍔ ㍕ ㍖ ㍗ ㍘ ㍙ ㍚ ㍛ ㍜",
             "㍝ ㍞ ㍟ ㍠ ㍡ ㍢ ㍣ ㍤ ㍥ ㍦ ㍧ ㍨ ㍩ ㍪ ㍫ ㍬" to "㍭ ㍮ ㍯ ㍰ ㍱ ㍲ ㍳ ㍴ ㍵ ㍶ ㍻ ㍼ ㍽ ㍾ ㍿ ㎀ ㎁ ㎂ ㎃",
         )
-        ioTestTemplate(data)
+        dbFileTestTemplate(data)
     }
 }
