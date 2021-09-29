@@ -3,28 +3,23 @@ import java.io.File
 import kotlin.system.exitProcess
 
 fun printIncorrectArgsMsg() {
-    println("Incorrect arguments. Please use -h or --help option to see help message.")
-    exitProcess(1)
+    throw Exception("Incorrect arguments. Please use -h or --help option to see help message.")
 }
 
 fun printHelpMsg() {
     TODO("write help message")
-    exitProcess(0)
 }
 
 fun printDatabaseNotExistMsg(dbPath: String) {
-    println("Database at \"$dbPath\" does not exist!")
-    exitProcess(1)
+    throw Exception("Database at \"$dbPath\" does not exist!")
 }
 
 fun printInvalidDatabaseMsg(dbPath: String) {
-    println("Database at \"$dbPath\" is not valid!")
-    exitProcess(1)
+    throw Exception("\"Database at \\\"$dbPath\\\" is not valid!\"")
 }
 
 fun printDatabaseNotContainsKey(dbPath: String, key: String) {
-    println("Database at \"$dbPath\" doesn't contain the key \"$key\".")
-    exitProcess(1)
+    throw Exception("Database at \"$dbPath\" doesn't contain the key \"$key\".")
 }
 
 fun readKeys(dbFileName: String, keys: List<String>) {
@@ -60,6 +55,5 @@ fun main(args: Array<String>) {
     if (args.isEmpty()) return printIncorrectArgsMsg()
 
     val option = args.first()
-    args.drop(1)
-    parseOption(option, args.toList())
+    parseOption(option, args.drop(1).toList())
 }
