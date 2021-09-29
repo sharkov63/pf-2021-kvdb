@@ -22,8 +22,8 @@ internal class ReadTests {
         System.setOut(PrintStream(stream))
         readKeys("$testDataDir/$dbFileName", keys)
         System.setOut(stdout)
-        val values = stream.toString().trim().lines().dropLastWhile { it.isEmpty() }
-        assertEquals(expectedValues, values)
+        val values = stream.toString().trim().lines()
+        assert(expectedValues == values || expectedValues.isEmpty() && values.dropLastWhile { it.isEmpty() }.isEmpty())
     }
 
     // A test where exitProcess() should be called
