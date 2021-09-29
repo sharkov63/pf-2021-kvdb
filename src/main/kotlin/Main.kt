@@ -45,6 +45,7 @@ fun printDataBaseAlreadyExists(dbPath: String) {
     exitProcess(1)
 }
 
+
 fun readKeys(dbFileName: String, keys: List<String>) {
     val dbFile = File(dbFileName)
     if (!dbFile.exists()) {
@@ -86,16 +87,21 @@ fun overwriteDataBase(dbFileName: String, data: Map<String, String>) {
     writeDatabaseToFile(dbFile, data)
 }
 
-fun parseReadArgs(args: List<String>) {
-    if (args.size < 2) return printIncorrectArgsMsg()
+
+data class ReadArgs(val dbFileName: String, val keys: List<String>)
+
+fun parseReadArgs(args: List<String>): ReadArgs? {
+    if (args.size < 2) return null
     val dbFileName = args[0]
     args.drop(1)
-    readKeys(dbFileName, args.toList())
+    return ReadArgs(dbFileName, args.toList())
 }
 
-fun parseCreateArgs(args: List<String>) {
-    if (args.isEmpty()) return printIncorrectArgsMsg()
-    if (args.size % 2 != 1) return printIncorrectArgsMsg()
+data class WriteArgs(val dbFileName: String, val dataToWrite: Map<String, String>)
+
+fun parseWriteArgs(args: List<String>): WriteArgs? {
+    if (args.isEmpty()) return null
+    if (args.size % 2 != 1) return null
     val dbFileName = args[0]
     val data: MutableMap<String, String> = mutableMapOf()
     val kvArgs = args.drop(1)
@@ -104,28 +110,31 @@ fun parseCreateArgs(args: List<String>) {
         val value = kvArgs[i + 1]
         data[key] = value
     }
-    createDataBase(dbFileName, data.toMap())
+    return WriteArgs(dbFileName, data.toMap())
 }
 
-fun parseOverwriteArgs(args: List<String>) {
-    if (args.isEmpty()) return printIncorrectArgsMsg()
-    if (args.size % 2 != 1) return printIncorrectArgsMsg()
-    val dbFileName = args[0]
-    val data: MutableMap<String, String> = mutableMapOf()
-    val kvArgs = args.drop(1)
-    for (i in kvArgs.indices step 2) {
-        val key = kvArgs[i]
-        val value = kvArgs[i + 1]
-        data[key] = value
-    }
-    overwriteDataBase(dbFileName, data.toMap())
+
+fun read(args: List<String>) {
+    val readArgs = parseReadArgs(args) ?: return printIncorrectArgsMsg()
+    readKeys(readArgs.dbFileName, readArgs.keys)
 }
+
+fun create(args: List<String>) {
+    val createArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
+    createDataBase(createArgs.dbFileName, createArgs.dataToWrite)
+}
+
+fun overwrite(args: List<String>) {
+    val overwriteArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
+    createDataBase(overwriteArgs.dbFileName, overwriteArgs.dataToWrite)
+}
+
 
 fun parseOption(option: String, args: List<String>) {
     when (option) {
-        "-r", "--read" -> parseReadArgs(args)
-        "-c", "--create" -> parseCreateArgs(args)
-        "-o", "--overwrite" -> parseOverwriteArgs(args)
+        "-r", "--read" -> read(args)
+        "-c", "--create" -> create(args)
+        "-o", "--overwrite" -> overwrite(args)
         "-h", "--help" -> printHelpMsg()
         else -> printIncorrectArgsMsg()
     }
