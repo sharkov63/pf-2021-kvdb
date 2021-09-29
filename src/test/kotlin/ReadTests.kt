@@ -2,7 +2,6 @@ import dbfile.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
-import java.security.Permission
 import kotlin.test.*
 
 internal class ReadTests {
@@ -17,7 +16,7 @@ internal class ReadTests {
         writeDatabaseToFile(file, data)
     }
 
-    // A test in which all values are correctly printed and no exitProcess() is called
+    // A test where no exitProcess() is called
     private fun correctTestTemplate(dbFileName: String, keys: List<String>, expectedValues: List<String>) {
         val stream = ByteArrayOutputStream()
         System.setOut(PrintStream(stream))
@@ -25,21 +24,6 @@ internal class ReadTests {
         System.setOut(stdout)
         val values = stream.toString().trim().lines().dropLastWhile { it.isEmpty() }
         assertEquals(expectedValues, values)
-    }
-
-    // To correctly test cases where exitProcess() is called
-    // we modify SecurityManager to disallow exit at any moment
-    private class NoExitSecurityManager : SecurityManager() {
-        override fun checkPermission(perm: Permission?) {
-            // allow anything
-        }
-        override fun checkPermission(perm: Permission?, context: Any?) {
-            // allow anything
-        }
-        override fun checkExit(status: Int) {
-            super.checkExit(status)
-            throw Exception("Exit block")
-        }
     }
 
     // A test where exitProcess() should be called
