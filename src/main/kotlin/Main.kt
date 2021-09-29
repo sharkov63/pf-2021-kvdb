@@ -71,6 +71,15 @@ fun createDataBase(dbFileName: String, data: Map<String, String>) {
     writeDatabaseToFile(dbFile, data)
 }
 
+fun overwriteDataBase(dbFileName: String, data: Map<String, String>) {
+    val dbFile = File(dbFileName)
+    dbFile.createNewFile()
+    if (!dbFile.canWrite()) {
+        return printCannotWriteToDataBase(dbFile.path)
+    }
+    writeDatabaseToFile(dbFile, data)
+}
+
 fun parseReadArgs(args: List<String>) {
     if (args.size < 2) return printIncorrectArgsMsg()
     val dbFileName = args[0]
@@ -92,10 +101,25 @@ fun parseCreateArgs(args: List<String>) {
     createDataBase(dbFileName, data.toMap())
 }
 
+fun parseOverwriteArgs(args: List<String>) {
+    if (args.isEmpty()) return printIncorrectArgsMsg()
+    if (args.size % 2 != 1) return printIncorrectArgsMsg()
+    val dbFileName = args[0]
+    val data: MutableMap<String, String> = mutableMapOf()
+    val kvArgs = args.drop(1)
+    for (i in kvArgs.indices step 2) {
+        val key = kvArgs[i]
+        val value = kvArgs[i + 1]
+        data[key] = value
+    }
+    overwriteDataBase(dbFileName, data.toMap())
+}
+
 fun parseOption(option: String, args: List<String>) {
     when (option) {
         "-r", "--read" -> parseReadArgs(args)
         "-c", "--create" -> parseCreateArgs(args)
+        "-o", "--overwrite" -> parseOverwriteArgs(args)
         "-h", "--help" -> printHelpMsg()
         else -> printIncorrectArgsMsg()
     }
