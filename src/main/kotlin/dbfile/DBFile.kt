@@ -17,19 +17,19 @@ import java.io.OutputStream
 
 
 // Conversion
-fun intToFourBytes(x: Int) = byteArrayOf(x.toByte(), (x shr 8).toByte(), (x shr 16).toByte(), (x shr 24).toByte())
+private fun intToFourBytes(x: Int) = byteArrayOf(x.toByte(), (x shr 8).toByte(), (x shr 16).toByte(), (x shr 24).toByte())
 
-fun fourBytesToInt(bytes: ByteArray): Int {
+private fun fourBytesToInt(bytes: ByteArray): Int {
     assert(bytes.size == 4)
     return bytes[0].toInt() or (bytes[1].toInt() shl 8) or (bytes[2].toInt() shl 16) or (bytes[3].toInt() shl 24)
 }
 
 // Write
-fun writeIntAsFourBytes(stream: OutputStream, x: Int) {
+private fun writeIntAsFourBytes(stream: OutputStream, x: Int) {
     stream.write(intToFourBytes(x))
 }
 
-fun writeString(stream: OutputStream, s: String) {
+private fun writeString(stream: OutputStream, s: String) {
     val bytes = s.toByteArray()
     writeIntAsFourBytes(stream, bytes.size)
     stream.write(bytes)
@@ -45,7 +45,7 @@ fun writeDatabaseToFile(file: File, data: Map<String, String>) {
 }
 
 // Read
-fun readInt(stream: InputStream): Int? {
+private fun readInt(stream: InputStream): Int? {
     val bytes = stream.readNBytes(4)
     return if (bytes.size == 4)
         fourBytesToInt(bytes)
@@ -55,7 +55,7 @@ fun readInt(stream: InputStream): Int? {
     }
 }
 
-fun readString(stream: InputStream, byteCount: Int): String? {
+private fun readString(stream: InputStream, byteCount: Int): String? {
     val bytes = stream.readNBytes(byteCount)
     return if (bytes.size == byteCount)
         bytes.decodeToString()
