@@ -1,5 +1,7 @@
 import dbfile.*
 import java.io.File
+import java.nio.file.Files.createDirectories
+import java.nio.file.Path
 import kotlin.system.exitProcess
 
 
@@ -62,6 +64,8 @@ fun readKeys(dbFileName: String, keys: List<String>) {
 
 fun createDataBase(dbFileName: String, data: Map<String, String>) {
     val dbFile = File(dbFileName)
+    val dbParentPath = Path.of(dbFile.parent)
+    createDirectories(dbParentPath)
     if (!dbFile.createNewFile()) {
         return printDataBaseAlreadyExists(dbFile.path)
     }
@@ -73,6 +77,8 @@ fun createDataBase(dbFileName: String, data: Map<String, String>) {
 
 fun overwriteDataBase(dbFileName: String, data: Map<String, String>) {
     val dbFile = File(dbFileName)
+    val dbParentPath = Path.of(dbFile.parent)
+    createDirectories(dbParentPath)
     dbFile.createNewFile()
     if (!dbFile.canWrite()) {
         return printCannotWriteToDataBase(dbFile.path)
