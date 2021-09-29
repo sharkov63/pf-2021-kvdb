@@ -3,7 +3,7 @@ import kotlin.test.*
 import dbfile.*
 
 internal class DBFileTests {
-    private val filename = "testData/io/testDatabase.db"
+    private val filename = "testData/dbfile/testDatabase.db"
 
     private fun dbFileTestTemplate(data: Map<String, String>) {
         val file = File(filename)
