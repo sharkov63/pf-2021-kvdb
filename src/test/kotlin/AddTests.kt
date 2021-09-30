@@ -83,10 +83,7 @@ internal class AddTests {
             "key" to "value"
         )
         val dataToAdd: Map<String, String> = mapOf()
-        incorrectAddTestTemplate(testName, dataToAdd)
-        val dbFile = File("$testDataDir/$testName.db")
-        dbFile.delete()
-        assert(!dbFile.exists())
+        correctAddTestTemplate(testName, dataToAdd)
     }
 
     @Test

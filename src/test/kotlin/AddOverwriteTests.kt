@@ -83,10 +83,7 @@ internal class AddOverwriteTests {
             "key" to "value"
         )
         val dataToAdd: Map<String, String> = mapOf()
-        incorrectAddOverwriteTestTemplate(testName, dataToAdd)
-        val dbFile = File("$testDataDir/$testName.db")
-        dbFile.delete()
-        assert(!dbFile.exists())
+        correctAddOverwriteTestTemplate(testName, dataToAdd)
     }
 
     @Test
