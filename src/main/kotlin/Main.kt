@@ -91,47 +91,65 @@ fun overwriteDataBase(dbFileName: String, data: Map<String, String>) {
     writeDatabaseToFile(dbFile, data)
 }
 
-fun addToDataBase(dbFileName: String, dataToAdd: Map<String, String>) {
-    if (dataToAdd.isEmpty()) return printNoDataToWriteMsg()
-    val dbFile = File(dbFileName)
-    val dbParentPath = Path.of(dbFile.parent)
-    createDirectories(dbParentPath)
-    dbFile.createNewFile()
-    if (!dbFile.canRead()) {
-        return printCannotReadDataBase(dbFile.path)
+fun addToDataBase(originalDBFileName: String, newDBFileName: String, dataToAdd: Map<String, String>) {
+    if (dataToAdd.isEmpty())
+        return printNoDataToWriteMsg()
+
+    val originalDBFile = File(originalDBFileName)
+    val newDBFile = File(newDBFileName)
+
+    if (originalDBFileName != newDBFileName && !originalDBFile.exists())
+        return printDatabaseNotExistMsg(originalDBFile.path)
+
+    val newDBParentPath = Path.of(newDBFile.parent)
+    createDirectories(newDBParentPath)
+    newDBFile.createNewFile()
+
+    if (!originalDBFile.canRead()) {
+        return printCannotReadDataBase(originalDBFile.path)
     }
-    val data = readDatabaseFromFile(dbFile) ?: return printInvalidDatabaseMsg(dbFile.path)
+
+    val data = readDatabaseFromFile(originalDBFile) ?: return printInvalidDatabaseMsg(originalDBFile.path)
     val dataToWrite = data + dataToAdd.filterKeys { key -> !data.containsKey(key) }
     val omittedRecords = dataToAdd.count { (key, _) -> data.containsKey(key) }
     val writtenRecords = dataToAdd.size - omittedRecords
-    if (!dbFile.canWrite()) {
-        return printCannotWriteToDataBase(dbFile.path)
+    if (!newDBFile.canWrite()) {
+        return printCannotWriteToDataBase(newDBFile.path)
     }
-    writeDatabaseToFile(dbFile, dataToWrite)
+    writeDatabaseToFile(newDBFile, dataToWrite)
     if (writtenRecords > 0)
-        println("Successfully written $writtenRecords records to database at \"${dbFile.path}\".")
+        println("Successfully written $writtenRecords records to database at \"${newDBFile.path}\".")
     if (omittedRecords > 0)
         println("$omittedRecords records were omitted, as database already contains their keys.")
 }
 
-fun writeToDataBase(dbFileName: String, dataToWrite: Map<String, String>) {
-    if (dataToWrite.isEmpty()) return printNoDataToWriteMsg()
-    val dbFile = File(dbFileName)
-    val dbParentPath = Path.of(dbFile.parent)
-    createDirectories(dbParentPath)
-    dbFile.createNewFile()
-    if (!dbFile.canRead()) {
-        return printCannotReadDataBase(dbFile.path)
+fun writeToDataBase(originalDBFileName: String, newDBFileName: String, dataToWrite: Map<String, String>) {
+    if (dataToWrite.isEmpty())
+        return printNoDataToWriteMsg()
+
+    val originalDBFile = File(originalDBFileName)
+    val newDBFile = File(newDBFileName)
+
+    if (originalDBFileName != newDBFileName && !originalDBFile.exists())
+        return printDatabaseNotExistMsg(originalDBFile.path)
+
+    val newDBParentPath = Path.of(newDBFile.parent)
+    createDirectories(newDBParentPath)
+    newDBFile.createNewFile()
+
+    if (!originalDBFile.canRead()) {
+        return printCannotReadDataBase(originalDBFile.path)
     }
-    val data = readDatabaseFromFile(dbFile) ?: return printInvalidDatabaseMsg(dbFile.path)
+
+    val data = readDatabaseFromFile(originalDBFile) ?: return printInvalidDatabaseMsg(originalDBFile.path)
     val overwrittenRecords = dataToWrite.count { (key, _) -> data.containsKey(key) }
     val writtenRecords = dataToWrite.size
-    if (!dbFile.canWrite()) {
-        return printCannotWriteToDataBase(dbFile.path)
+    if (!newDBFile.canWrite()) {
+        return printCannotWriteToDataBase(newDBFile.path)
     }
-    writeDatabaseToFile(dbFile, data + dataToWrite)
+    writeDatabaseToFile(newDBFile, data + dataToWrite)
     if (writtenRecords > 0)
-        println("Successfully written $writtenRecords records to database at \"${dbFile.path}\".")
+        println("Successfully written $writtenRecords records to database at \"${newDBFile.path}\".")
     if (overwrittenRecords > 0)
         println("$overwrittenRecords of those records were overwritten")
 }
@@ -146,9 +164,9 @@ fun parseReadArgs(args: List<String>): ReadArgs? {
     return ReadArgs(dbFileName, args.toList())
 }
 
-data class WriteArgs(val dbFileName: String, val dataToWrite: Map<String, String>)
+data class ModifyArgs(val dbFileName: String, val dataToWrite: Map<String, String>)
 
-fun parseWriteArgs(args: List<String>): WriteArgs? {
+fun parseModifyArgs(args: List<String>): ModifyArgs? {
     if (args.isEmpty()) return null
     if (args.size % 2 != 1) return null
     val dbFileName = args[0]
@@ -159,7 +177,24 @@ fun parseWriteArgs(args: List<String>): WriteArgs? {
         val value = kvArgs[i + 1]
         data[key] = value
     }
-    return WriteArgs(dbFileName, data.toMap())
+    return ModifyArgs(dbFileName, data.toMap())
+}
+
+data class WriteArgs(val originalDBFileName: String, val newDBFileName: String, val dataToWrite: Map<String, String>)
+
+fun parseWriteArgs(args: List<String>): WriteArgs? {
+    if (args.size < 2) return null
+    if (args.size % 2 != 0) return null
+    val originalDBFileName = args[0]
+    val newDBFileName = if (args[1] == "!") originalDBFileName else args[1]
+    val data: MutableMap<String, String> = mutableMapOf()
+    val kvArgs = args.drop(2)
+    for (i in kvArgs.indices step 2) {
+        val key = kvArgs[i]
+        val value = kvArgs[i + 1]
+        data[key] = value
+    }
+    return WriteArgs(originalDBFileName, newDBFileName, data.toMap())
 }
 
 
@@ -169,23 +204,23 @@ fun read(args: List<String>) {
 }
 
 fun create(args: List<String>) {
-    val createArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
+    val createArgs = parseModifyArgs(args) ?: return printIncorrectArgsMsg()
     createDataBase(createArgs.dbFileName, createArgs.dataToWrite)
 }
 
 fun overwrite(args: List<String>) {
-    val overwriteArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
+    val overwriteArgs = parseModifyArgs(args) ?: return printIncorrectArgsMsg()
     createDataBase(overwriteArgs.dbFileName, overwriteArgs.dataToWrite)
 }
 
 fun add(args: List<String>) {
     val addArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
-    addToDataBase(addArgs.dbFileName, addArgs.dataToWrite)
+    addToDataBase(addArgs.originalDBFileName, addArgs.newDBFileName, addArgs.dataToWrite)
 }
 
 fun write(args: List<String>) {
     val writeArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
-    writeToDataBase(writeArgs.dbFileName, writeArgs.dataToWrite)
+    writeToDataBase(writeArgs.originalDBFileName, writeArgs.newDBFileName, writeArgs.dataToWrite)
 }
 
 fun parseOption(option: String, args: List<String>) {

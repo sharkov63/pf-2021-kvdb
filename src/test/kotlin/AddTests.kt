@@ -6,22 +6,22 @@ internal class AddTests {
     private val testDataDir = "testData/add"
 
     // A test where no exitProcess() is called
-    private fun correctAddTestTemplate(testName: String, initialData: Map<String, String>, dataToAdd: Map<String, String>) {
-        val dbPath = "$testDataDir/$testName.db"
+    private fun correctAddTestTemplate(testName: String, dataToAdd: Map<String, String>) {
+        val originalDBPath = "$testDataDir/$testName-original.db"
+        val newDBPath = "$testDataDir/$testName.db"
         val correctDBPath = "$testDataDir/$testName-correct.db"
-        val dbFile = File(dbPath)
+        val newDBFile = File(newDBPath)
         val correctDBFile = File(correctDBPath)
-        writeDatabaseToFile(dbFile, initialData)
-        addToDataBase(dbPath, dataToAdd)
-        assertEquals(readDatabaseFromFile(correctDBFile), readDatabaseFromFile(dbFile))
-        assert(dbFile.delete())
+        addToDataBase(originalDBPath, newDBPath, dataToAdd)
+        assertEquals(readDatabaseFromFile(correctDBFile), readDatabaseFromFile(newDBFile))
+        assert(newDBFile.delete())
     }
 
     // A test where exitProcess() should be called
-    private fun incorrectAddTestTemplate(testName: String, initialData: Map<String, String>, dataToAdd: Map<String, String>) {
+    private fun incorrectAddTestTemplate(testName: String, dataToAdd: Map<String, String>) {
         val noExitSecurityManager = NoExitSecurityManager()
         System.setSecurityManager(noExitSecurityManager)
-        assertFails { correctAddTestTemplate(testName, initialData, dataToAdd) }
+        assertFails { correctAddTestTemplate(testName, dataToAdd) }
     }
 
     @Test
@@ -38,7 +38,7 @@ internal class AddTests {
             "5" to "0",
             "8" to "10",
         )
-        correctAddTestTemplate(testName, initialData, dataToAdd)
+        correctAddTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class AddTests {
             "1" to "3",
             "3" to "10",
         )
-        correctAddTestTemplate(testName, initialData, dataToAdd)
+        correctAddTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -70,7 +70,7 @@ internal class AddTests {
             "6" to "7",
             "4" to "4",
         )
-        correctAddTestTemplate(testName, initialData, dataToAdd)
+        correctAddTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -81,9 +81,10 @@ internal class AddTests {
             "key" to "value"
         )
         val dataToAdd: Map<String, String> = mapOf()
-        incorrectAddTestTemplate(testName, initialData, dataToAdd)
+        incorrectAddTestTemplate(testName, dataToAdd)
         val dbFile = File("$testDataDir/$testName.db")
-        assert(dbFile.delete())
+        dbFile.delete()
+        assert(!dbFile.exists())
     }
 
     @Test
@@ -94,7 +95,7 @@ internal class AddTests {
             "iwant" to "add",
             "some" to "data",
         )
-        correctAddTestTemplate(testName, initialData, dataToAdd)
+        correctAddTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -104,13 +105,32 @@ internal class AddTests {
             "1" to "1",
             "-1" to "test",
         )
+        incorrectAddTestTemplate(testName, dataToAdd)
+    }
 
-        val dbPath = "$testDataDir/$testName.db"
-        val correctDBPath = "$testDataDir/$testName-correct.db"
-        val dbFile = File(dbPath)
-        val correctDBFile = File(correctDBPath)
-        addToDataBase(dbPath, dataToAdd)
+    @Test
+    fun addToSameFile() {
+        val testName = "addToSameFile"
+        val initialData = mapOf(
+            "1" to "1",
+            "2" to "2",
+            "4" to "5",
+            "10" to "11",
+        )
+        val dataToAdd = mapOf(
+            "1" to "2",
+            "3" to "3",
+            "4" to "5",
+            "11" to "20",
+        )
+        val dbFileName = "$testDataDir/$testName.db"
+        val correctDBFileName = "$testDataDir/$testName-correct.db"
+        val dbFile = File(dbFileName)
+        val correctDBFile = File(correctDBFileName)
+        writeDatabaseToFile(dbFile, initialData)
+        addToDataBase(dbFileName, dbFileName, dataToAdd)
         assertEquals(readDatabaseFromFile(correctDBFile), readDatabaseFromFile(dbFile))
-        assert(dbFile.delete())
+        dbFile.delete()
+        assert(!dbFile.exists())
     }
 }
