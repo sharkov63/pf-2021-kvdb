@@ -1,4 +1,6 @@
 import dbfile.*
+import operations.*
+
 import java.io.File
 import kotlin.test.*
 
