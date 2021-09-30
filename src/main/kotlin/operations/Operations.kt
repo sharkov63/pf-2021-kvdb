@@ -15,7 +15,7 @@ import java.nio.file.Path
 /* Aux functions */
 
 private fun ensureAncestorDirectories(file: File) {
-    val parentPath = Path.of(file.parent)
+    val parentPath = file.absoluteFile.parentFile.toPath()
     createDirectories(parentPath)
 }
 

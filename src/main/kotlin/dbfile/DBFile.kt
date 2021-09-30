@@ -62,8 +62,18 @@ fun writeDatabaseToFile(file: File, data: Map<String, String>) {
 
 /* Read */
 
+private fun readNBytes(stream: InputStream, N: Int): ByteArray {
+    var bytes = byteArrayOf()
+    for (i in 1..N) {
+        val byte = stream.read()
+        if (byte == -1) break
+        bytes += byte.toByte()
+    }
+    return bytes
+}
+
 private fun readInt(stream: InputStream): Int? {
-    val bytes = stream.readNBytes(4)
+    val bytes = readNBytes(stream, 4)
     return if (bytes.size == 4)
         fourBytesToInt(bytes)
     else {
@@ -73,7 +83,7 @@ private fun readInt(stream: InputStream): Int? {
 }
 
 private fun readString(stream: InputStream, byteCount: Int): String? {
-    val bytes = stream.readNBytes(byteCount)
+    val bytes = readNBytes(stream, byteCount)
     return if (bytes.size == byteCount)
         bytes.decodeToString()
     else {
