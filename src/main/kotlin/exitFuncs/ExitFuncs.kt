@@ -46,7 +46,7 @@ fun exitDatabaseNotContainsKey(dbPath: String, key: String) {
 }
 
 fun exitDataBaseAlreadyExists(dbPath: String) {
-    println("Database at \"$dbPath\" already exists! Use -o or --overwrite to allow overwriting the database.")
+    println("Database at \"$dbPath\" already exists! Use -co or --createo or --createOverwrite options to allow overwriting the database.")
     exitProcess(1)
 }
 
