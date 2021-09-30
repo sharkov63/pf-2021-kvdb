@@ -50,7 +50,7 @@ fun exitDataBaseAlreadyExists(dbPath: String) {
     exitProcess(1)
 }
 
-fun exitNoDataToWrite() {
-    println("No data to write.")
+fun exitNothingToDo() {
+    println("Nothing to do.")
     exitProcess(0)
 }

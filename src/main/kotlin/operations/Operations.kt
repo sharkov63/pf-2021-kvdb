@@ -84,11 +84,11 @@ fun createDataBase(dbFileName: String, data: Map<String, String>, overwrite: Boo
  * If the original database cannot be reached or read, or is invalid,
  * or it cannot write to the new database, calls a corresponding exit function.
  *
- * If there is no data to add, calls [exitNoDataToWrite].
+ * If [dataToAdd] is empty, works as a copy operation.
  */
 fun addToDataBase(originalDBFileName: String, newDBFileName: String, dataToAdd: Map<String, String>, overwrite: Boolean = false) {
-    if (dataToAdd.isEmpty())
-        return exitNoDataToWrite()
+    if (dataToAdd.isEmpty() && originalDBFileName == newDBFileName)
+        return exitNothingToDo()
 
     val originalDBFile = File(originalDBFileName)
     val newDBFile = File(newDBFileName)
@@ -131,4 +131,7 @@ fun addToDataBase(originalDBFileName: String, newDBFileName: String, dataToAdd: 
         if (overwrittenRecords > 0)
             println("$overwrittenRecords of those records overwrote the data.")
     }
+
+    if (dataToAdd.isEmpty())
+        println("Successfully copied \"$originalDBFile\" to \"$newDBFile\"")
 }
