@@ -45,6 +45,10 @@ fun printDataBaseAlreadyExists(dbPath: String) {
     exitProcess(1)
 }
 
+fun printNoDataToWriteMsg() {
+    println("No data to write.")
+    exitProcess(0)
+}
 
 fun readKeys(dbFileName: String, keys: List<String>) {
     val dbFile = File(dbFileName)
@@ -87,6 +91,28 @@ fun overwriteDataBase(dbFileName: String, data: Map<String, String>) {
     writeDatabaseToFile(dbFile, data)
 }
 
+fun addToDataBase(dbFileName: String, dataToAdd: Map<String, String>) {
+    if (dataToAdd.isEmpty()) return printNoDataToWriteMsg()
+    val dbFile = File(dbFileName)
+    val dbParentPath = Path.of(dbFile.parent)
+    createDirectories(dbParentPath)
+    dbFile.createNewFile()
+    if (!dbFile.canRead()) {
+        return printCannotReadDataBase(dbFile.path)
+    }
+    val data = readDatabaseFromFile(dbFile) ?: return printInvalidDatabaseMsg(dbFile.path)
+    val dataToWrite = data + dataToAdd.filterKeys { key -> !data.containsKey(key) }
+    val omittedRecords = dataToAdd.count { (key, _) -> data.containsKey(key) }
+    val writtenRecords = dataToAdd.size - omittedRecords
+    if (!dbFile.canWrite()) {
+        return printCannotWriteToDataBase(dbFile.path)
+    }
+    writeDatabaseToFile(dbFile, dataToWrite)
+    if (writtenRecords > 0)
+        println("Successfully written $writtenRecords records to database at \"${dbFile.path}\".")
+    if (omittedRecords > 0)
+        println("$omittedRecords records were omitted, as database already contains their keys.")
+}
 
 data class ReadArgs(val dbFileName: String, val keys: List<String>)
 
@@ -129,12 +155,17 @@ fun overwrite(args: List<String>) {
     createDataBase(overwriteArgs.dbFileName, overwriteArgs.dataToWrite)
 }
 
+fun add(args: List<String>) {
+    val addArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
+    addToDataBase(addArgs.dbFileName, addArgs.dataToWrite)
+}
 
 fun parseOption(option: String, args: List<String>) {
     when (option) {
         "-r", "--read" -> read(args)
         "-c", "--create" -> create(args)
         "-o", "--overwrite" -> overwrite(args)
+        "-a", "--add" -> add(args)
         "-h", "--help" -> printHelpMsg()
         else -> printIncorrectArgsMsg()
     }
