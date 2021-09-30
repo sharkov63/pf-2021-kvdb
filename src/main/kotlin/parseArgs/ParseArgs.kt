@@ -30,7 +30,7 @@ fun parseReadArgs(args: List<String>): ReadArgs? {
 
 
 /**
- * Modify args.
+ * Create args.
  * The format is as follows:
  *
  * DATABASE_FILE KEY1 VALUE1 KEY2 VALUE2 ...
@@ -40,9 +40,9 @@ fun parseReadArgs(args: List<String>): ReadArgs? {
  * There may be zero key-value pairs
  */
 
-data class ModifyArgs(val dbFileName: String, val dataToWrite: Map<String, String>)
+data class CreateArgs(val dbFileName: String, val dataToWrite: Map<String, String>)
 
-fun parseModifyArgs(args: List<String>): ModifyArgs? {
+fun parseCreateArgs(args: List<String>): CreateArgs? {
     if (args.isEmpty())
         return null
     if (args.size % 2 != 1)
@@ -60,12 +60,12 @@ fun parseModifyArgs(args: List<String>): ModifyArgs? {
         data[key] = value
     }
 
-    return ModifyArgs(dbFileName, data.toMap())
+    return CreateArgs(dbFileName, data.toMap())
 }
 
 
 /**
- * Write args.
+ * Add args.
  * The format is as follows:
  *
  * ORIGINAL_DATABASE_FILE NEW_DATABASE_FILE KEY1 VALUE1 KEY2 VALUE2 ...
@@ -78,9 +78,9 @@ fun parseModifyArgs(args: List<String>): ModifyArgs? {
  * in which case it is considered equal to ORIGINAL_DATABASE_FILE.
  */
 
-data class WriteArgs(val originalDBFileName: String, val newDBFileName: String, val dataToWrite: Map<String, String>)
+data class AddArgs(val originalDBFileName: String, val newDBFileName: String, val dataToWrite: Map<String, String>)
 
-fun parseWriteArgs(args: List<String>): WriteArgs? {
+fun parseAddArgs(args: List<String>): AddArgs? {
     if (args.size < 2)
         return null
     if (args.size % 2 != 0)
@@ -99,5 +99,5 @@ fun parseWriteArgs(args: List<String>): WriteArgs? {
         data[key] = value
     }
 
-    return WriteArgs(originalDBFileName, newDBFileName, data.toMap())
+    return AddArgs(originalDBFileName, newDBFileName, data.toMap())
 }

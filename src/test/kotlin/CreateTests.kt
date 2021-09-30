@@ -11,7 +11,7 @@ internal class CreateTests {
     private fun correctCreateTestTemplate(testName: String, data: Map<String, String>) {
         val dbPath = "$testDataDir/$testName.db"
         val correctDBPath = "$testDataDir/$testName-correct.db"
-        createDataBase(dbPath, data)
+        createDataBase(dbPath, data, false)
         val dbFile = File(dbPath)
         val correctDBFile = File(correctDBPath)
         assertEquals(correctDBFile.readText(), dbFile.readText())
@@ -69,6 +69,8 @@ internal class CreateTests {
         val dbFile = File("$testDataDir/$testName.db")
         writeDatabaseToFile(dbFile, dataInAlreadyCreated)
         incorrectCreateTestTemplate(testName, data)
+        dbFile.delete()
+        assert(!dbFile.exists())
     }
 
     @Test
@@ -82,7 +84,7 @@ internal class CreateTests {
         val dbFilePath = "$testDataDir/$testSubPath"
         val correctDBFilePath = "$testDataDir/$testName-correct.db"
         val correctDBFile = File(correctDBFilePath)
-        createDataBase(dbFilePath, data)
+        createDataBase(dbFilePath, data, false)
         val dbFile = File(dbFilePath)
         assertEquals(correctDBFile.readText(), dbFile.readText())
         assert(dbFile.delete())

@@ -1,6 +1,4 @@
-import dbfile.*
 import parseArgs.*
-import java.io.File
 import kotlin.test.*
 
 internal class ParseArgsTests {
@@ -37,7 +35,7 @@ internal class ParseArgsTests {
 
     @Test
     fun parseCorrectModifyArgsTest() {
-        val modifyArgs = parseModifyArgs(listOf("database.db", "key1", "value1", "key2", "value1"))
+        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key2", "value1"))
         assertNotNull(modifyArgs)
         assertEquals("database.db", modifyArgs.dbFileName)
         assertEquals(mapOf("key1" to "value1", "key2" to "value1"), modifyArgs.dataToWrite)
@@ -45,13 +43,13 @@ internal class ParseArgsTests {
 
     @Test
     fun parseEqualKeysModifyArgsTest() {
-        val modifyArgs = parseModifyArgs(listOf("database.db", "key1", "value1", "key1", "value2"))
+        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key1", "value2"))
         assertNull(modifyArgs)
     }
 
     @Test
     fun parseEqualKeysAndValuesModifyArgsTest() {
-        val modifyArgs = parseModifyArgs(listOf("database.db", "key1", "value1", "key1", "value1"))
+        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key1", "value1"))
         assertNotNull(modifyArgs)
         assertEquals("database.db", modifyArgs.dbFileName)
         assertEquals(mapOf("key1" to "value1"), modifyArgs.dataToWrite)
@@ -59,13 +57,13 @@ internal class ParseArgsTests {
 
     @Test
     fun parseOddKeyValueArgsModifyArgsTest() {
-        val modifyArgs = parseModifyArgs(listOf("database.db", "key1", "value1", "key2"))
+        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key2"))
         assertNull(modifyArgs)
     }
 
     @Test
     fun parseEmptyKeyValuesModifyArgsTest() {
-        val modifyArgs = parseModifyArgs(listOf("database.db"))
+        val modifyArgs = parseCreateArgs(listOf("database.db"))
         assertNotNull(modifyArgs)
         assertEquals("database.db", modifyArgs.dbFileName)
         assertEquals(mapOf(), modifyArgs.dataToWrite)
@@ -73,7 +71,7 @@ internal class ParseArgsTests {
 
     @Test
     fun parseEmptyModifyArgsTest() {
-        val modifyArgs = parseModifyArgs(listOf())
+        val modifyArgs = parseCreateArgs(listOf())
         assertNull(modifyArgs)
     }
 
@@ -82,7 +80,7 @@ internal class ParseArgsTests {
 
     @Test
     fun parseCorrectWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2", "value1"))
+        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2", "value1"))
         assertNotNull(writeArgs)
         assertEquals("database1.db", writeArgs.originalDBFileName)
         assertEquals("database2.db", writeArgs.newDBFileName)
@@ -91,7 +89,7 @@ internal class ParseArgsTests {
 
     @Test
     fun parseExclamationMarkWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf("database1.db", "!", "key1", "value1", "key2", "value1"))
+        val writeArgs = parseAddArgs(listOf("database1.db", "!", "key1", "value1", "key2", "value1"))
         assertNotNull(writeArgs)
         assertEquals("database1.db", writeArgs.originalDBFileName)
         assertEquals("database1.db", writeArgs.newDBFileName)
@@ -100,13 +98,13 @@ internal class ParseArgsTests {
 
     @Test
     fun parseEqualKeysWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value2"))
+        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value2"))
         assertNull(writeArgs)
     }
 
     @Test
     fun parseEqualKeysAndValuesWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value1"))
+        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value1"))
         assertNotNull(writeArgs)
         assertEquals("database1.db", writeArgs.originalDBFileName)
         assertEquals("database2.db", writeArgs.newDBFileName)
@@ -115,13 +113,13 @@ internal class ParseArgsTests {
 
     @Test
     fun parseOddKeyValueArgsWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2"))
+        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2"))
         assertNull(writeArgs)
     }
 
     @Test
     fun parseEmptyKeyValuesWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf("database1.db", "database2.db"))
+        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db"))
         assertNotNull(writeArgs)
         assertEquals("database1.db", writeArgs.originalDBFileName)
         assertEquals("database2.db", writeArgs.newDBFileName)
@@ -130,13 +128,13 @@ internal class ParseArgsTests {
 
     @Test
     fun parseOnlyOneFileWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf("database1.db"))
+        val writeArgs = parseAddArgs(listOf("database1.db"))
         assertNull(writeArgs)
     }
 
     @Test
     fun parseEmptyWriteArgsTest() {
-        val writeArgs = parseWriteArgs(listOf())
+        val writeArgs = parseAddArgs(listOf())
         assertNull(writeArgs)
     }
 }
