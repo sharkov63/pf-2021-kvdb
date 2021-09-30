@@ -101,3 +101,28 @@ fun parseAddArgs(args: List<String>): AddArgs? {
 
     return AddArgs(originalDBFileName, newDBFileName, data.toMap())
 }
+
+
+/**
+ * Delete args.
+ * The format is as follows:
+ *
+ * ORIGINAL_DATABASE_FILE NEW_DATABASE_FILE KEY1 KEY2 KEY3 ...
+ *
+ * Keys do not have to be distinct. The number of keys may be zero.
+ *
+ * NEW_DATABASE_FILE might be equal to "!",
+ * in which case it is considered equal to ORIGINAL_DATABASE_FILE.
+ */
+
+data class DeleteArgs(val originalDBFileName: String, val newDBFileName: String, val keys: List<String>)
+
+fun parseDeleteArgs(args: List<String>): DeleteArgs? {
+    if (args.size < 2)
+        return null
+
+    val originalDBFileName = args[0]
+    val newDBFileName = if (args[1] == "!") originalDBFileName else args[1]
+    val keys = args.drop(2)
+    return DeleteArgs(originalDBFileName, newDBFileName, keys)
+}

@@ -137,4 +137,46 @@ internal class ParseArgsTests {
         val addArgs = parseAddArgs(listOf())
         assertNull(addArgs)
     }
+
+
+    /* Delete args */
+
+    @Test
+    fun parseCorrectDeleteArgsTest() {
+        val deleteArgs = parseDeleteArgs(listOf("database1.db", "database2.db", "key1", "key2", "key1"))
+        assertNotNull(deleteArgs)
+        assertEquals("database1.db", deleteArgs.originalDBFileName)
+        assertEquals("database2.db", deleteArgs.newDBFileName)
+        assertEquals(listOf("key1", "key2", "key1"), deleteArgs.keys)
+    }
+
+    @Test
+    fun parseExclamationMarkDeleteArgsTest() {
+        val deleteArgs = parseDeleteArgs(listOf("database1.db", "!", "key1", "key2", "key1"))
+        assertNotNull(deleteArgs)
+        assertEquals("database1.db", deleteArgs.originalDBFileName)
+        assertEquals("database1.db", deleteArgs.newDBFileName)
+        assertEquals(listOf("key1", "key2", "key1"), deleteArgs.keys)
+    }
+
+    @Test
+    fun parseNoKeysDeleteArgsTest() {
+        val deleteArgs = parseDeleteArgs(listOf("database1.db", "database2.db"))
+        assertNotNull(deleteArgs)
+        assertEquals("database1.db", deleteArgs.originalDBFileName)
+        assertEquals("database2.db", deleteArgs.newDBFileName)
+        assertEquals(listOf(), deleteArgs.keys)
+    }
+
+    @Test
+    fun parseOnlyOneFileDeleteArgsTest() {
+        val deleteArgs = parseDeleteArgs(listOf("database1.db"))
+        assertNull(deleteArgs)
+    }
+
+    @Test
+    fun parseEmptyDeleteArgsTest() {
+        val deleteArgs = parseDeleteArgs(listOf())
+        assertNull(deleteArgs)
+    }
 }

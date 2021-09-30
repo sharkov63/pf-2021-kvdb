@@ -135,3 +135,49 @@ fun addToDataBase(originalDBFileName: String, newDBFileName: String, dataToAdd: 
     if (dataToAdd.isEmpty())
         println("Successfully copied \"$originalDBFile\" to \"$newDBFile\"")
 }
+
+
+/**
+ * Deletes [keys] in database at [originalDBFileName]
+ * and saves the result to the database at [newDBFileName] (which may be equal to [originalDBFileName])
+ *
+ * If a key appears second time in [keys], it will be deleted as if it appeared once.
+ *
+ * Writes statistics of deleted records to stdout.
+ *
+ * If the original database cannot be reached or read, or is invalid,
+ * or it cannot write to the new database, calls a corresponding exit function.
+ *
+ * If [keys] is empty, works as a copy operation.
+ */
+fun deleteKeysInDataBase(originalDBFileName: String, newDBFileName: String, keys: List<String>) {
+    if (keys.isEmpty() && originalDBFileName == newDBFileName)
+        return exitNothingToDo()
+
+    val originalDBFile = File(originalDBFileName)
+    val newDBFile = File(newDBFileName)
+
+    if (originalDBFileName != newDBFileName && !originalDBFile.exists())
+        return exitDatabaseNotExist(originalDBFile.path)
+
+    if (!originalDBFile.canRead())
+        return exitCannotReadDataBase(originalDBFile.path)
+
+
+    val data = readDatabaseFromFile(originalDBFile) ?: return exitInvalidDatabase(originalDBFile.path)
+    val setKeys = keys.toSet()
+    val dataToWrite = data.filterKeys { !setKeys.contains(it) }
+    val deletedRecords = data.size - dataToWrite.size
+
+    ensureFile(newDBFile)
+    if (!newDBFile.canWrite()) {
+        return exitCannotWriteToDataBase(newDBFile.path)
+    }
+    writeDatabaseToFile(newDBFile, dataToWrite)
+
+    println(when {
+        keys.isEmpty() -> "Successfully copied \"$originalDBFile\" to \"$newDBFile\""
+        deletedRecords > 0 -> "Successfully deleted $deletedRecords records."
+        else -> "Database was not changed: no records were deleted."
+    })
+}
