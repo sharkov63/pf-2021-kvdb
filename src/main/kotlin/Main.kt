@@ -1,4 +1,5 @@
 import dbfile.*
+import parseArgs.*
 import java.io.File
 import java.nio.file.Files.createDirectories
 import java.nio.file.Path
@@ -152,49 +153,6 @@ fun writeToDataBase(originalDBFileName: String, newDBFileName: String, dataToWri
         println("Successfully written $writtenRecords records to database at \"${newDBFile.path}\".")
     if (overwrittenRecords > 0)
         println("$overwrittenRecords of those records were overwritten")
-}
-
-
-data class ReadArgs(val dbFileName: String, val keys: List<String>)
-
-fun parseReadArgs(args: List<String>): ReadArgs? {
-    if (args.size < 2) return null
-    val dbFileName = args[0]
-    args.drop(1)
-    return ReadArgs(dbFileName, args.toList())
-}
-
-data class ModifyArgs(val dbFileName: String, val dataToWrite: Map<String, String>)
-
-fun parseModifyArgs(args: List<String>): ModifyArgs? {
-    if (args.isEmpty()) return null
-    if (args.size % 2 != 1) return null
-    val dbFileName = args[0]
-    val data: MutableMap<String, String> = mutableMapOf()
-    val kvArgs = args.drop(1)
-    for (i in kvArgs.indices step 2) {
-        val key = kvArgs[i]
-        val value = kvArgs[i + 1]
-        data[key] = value
-    }
-    return ModifyArgs(dbFileName, data.toMap())
-}
-
-data class WriteArgs(val originalDBFileName: String, val newDBFileName: String, val dataToWrite: Map<String, String>)
-
-fun parseWriteArgs(args: List<String>): WriteArgs? {
-    if (args.size < 2) return null
-    if (args.size % 2 != 0) return null
-    val originalDBFileName = args[0]
-    val newDBFileName = if (args[1] == "!") originalDBFileName else args[1]
-    val data: MutableMap<String, String> = mutableMapOf()
-    val kvArgs = args.drop(2)
-    for (i in kvArgs.indices step 2) {
-        val key = kvArgs[i]
-        val value = kvArgs[i + 1]
-        data[key] = value
-    }
-    return WriteArgs(originalDBFileName, newDBFileName, data.toMap())
 }
 
 
