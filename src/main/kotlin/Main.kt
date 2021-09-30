@@ -114,6 +114,29 @@ fun addToDataBase(dbFileName: String, dataToAdd: Map<String, String>) {
         println("$omittedRecords records were omitted, as database already contains their keys.")
 }
 
+fun writeToDataBase(dbFileName: String, dataToWrite: Map<String, String>) {
+    if (dataToWrite.isEmpty()) return printNoDataToWriteMsg()
+    val dbFile = File(dbFileName)
+    val dbParentPath = Path.of(dbFile.parent)
+    createDirectories(dbParentPath)
+    dbFile.createNewFile()
+    if (!dbFile.canRead()) {
+        return printCannotReadDataBase(dbFile.path)
+    }
+    val data = readDatabaseFromFile(dbFile) ?: return printInvalidDatabaseMsg(dbFile.path)
+    val overwrittenRecords = dataToWrite.count { (key, _) -> data.containsKey(key) }
+    val writtenRecords = dataToWrite.size
+    if (!dbFile.canWrite()) {
+        return printCannotWriteToDataBase(dbFile.path)
+    }
+    writeDatabaseToFile(dbFile, data + dataToWrite)
+    if (writtenRecords > 0)
+        println("Successfully written $writtenRecords records to database at \"${dbFile.path}\".")
+    if (overwrittenRecords > 0)
+        println("$overwrittenRecords of those records were overwritten")
+}
+
+
 data class ReadArgs(val dbFileName: String, val keys: List<String>)
 
 fun parseReadArgs(args: List<String>): ReadArgs? {
@@ -160,12 +183,18 @@ fun add(args: List<String>) {
     addToDataBase(addArgs.dbFileName, addArgs.dataToWrite)
 }
 
+fun write(args: List<String>) {
+    val writeArgs = parseWriteArgs(args) ?: return printIncorrectArgsMsg()
+    writeToDataBase(writeArgs.dbFileName, writeArgs.dataToWrite)
+}
+
 fun parseOption(option: String, args: List<String>) {
     when (option) {
         "-r", "--read" -> read(args)
         "-c", "--create" -> create(args)
         "-o", "--overwrite" -> overwrite(args)
         "-a", "--add" -> add(args)
+        "-w", "--write" -> write(args)
         "-h", "--help" -> printHelpMsg()
         else -> printIncorrectArgsMsg()
     }
