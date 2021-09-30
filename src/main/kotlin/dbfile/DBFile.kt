@@ -13,10 +13,13 @@ import java.io.OutputStream
  * KEY1 VALUE1 KEY2 VALUE2 ...
  * Each string starts with a 32-byte integer N, which declares the length of the string.
  * Then, N next bytes decode the string.
+ * String records are consecutive and have no separators in-between.
  */
 
 
-// Conversion
+
+/* Conversion */
+
 private fun intToFourBytes(x: Int) = byteArrayOf(x.toByte(), (x shr 8).toByte(), (x shr 16).toByte(), (x shr 24).toByte())
 
 private fun fourBytesToInt(bytes: ByteArray): Int {
@@ -24,7 +27,9 @@ private fun fourBytesToInt(bytes: ByteArray): Int {
     return bytes[0].toInt() or (bytes[1].toInt() shl 8) or (bytes[2].toInt() shl 16) or (bytes[3].toInt() shl 24)
 }
 
-// Write
+
+/* Write */
+
 private fun writeIntAsFourBytes(stream: OutputStream, x: Int) {
     stream.write(intToFourBytes(x))
 }
@@ -35,7 +40,17 @@ private fun writeString(stream: OutputStream, s: String) {
     stream.write(bytes)
 }
 
+
+/**
+ * Writes contents of [data] to a [file] in the mentioned format.
+ *
+ * If it cannot write to [file], throws an exception.
+ */
 fun writeDatabaseToFile(file: File, data: Map<String, String>) {
+    file.createNewFile()
+    if (!file.canWrite()) {
+        throw Exception("Cannot write to a file at \"${file.path}\"")
+    }
     val stream = file.outputStream()
     data.forEach { (key, value) ->
         writeString(stream, key)
@@ -44,7 +59,9 @@ fun writeDatabaseToFile(file: File, data: Map<String, String>) {
     stream.close()
 }
 
-// Read
+
+/* Read */
+
 private fun readInt(stream: InputStream): Int? {
     val bytes = stream.readNBytes(4)
     return if (bytes.size == 4)
@@ -65,15 +82,27 @@ private fun readString(stream: InputStream, byteCount: Int): String? {
     }
 }
 
+
+/**
+ * Reads database content from [file].
+ *
+ * Returns null if the database could not be read or the database doesn't match the format.
+ * Otherwise, returns the data in a [Map].
+ */
 fun readDatabaseFromFile(file: File): Map<String, String>? {
+    if (!file.canRead())
+        return null
+
     val stream = file.inputStream()
     val data: MutableMap<String, String> = mutableMapOf()
     while (true) {
-        val keyLen = readInt(stream) ?: break
-        val key = readString(stream, keyLen) ?: return null
-        val valueLen = readInt(stream) ?: return null
-        val value = readString(stream, valueLen) ?: return null
-        data[key] = value
+        val keyLen = readInt(stream) ?: break // read key length, otherwise EOF
+        val key = readString(stream, keyLen) ?: return null // read key, otherwise invalid database
+        val valueLen = readInt(stream) ?: return null // read value length, otherwise invalid database
+        val value = readString(stream, valueLen) ?: return null // read value, otherwise invalid database
+        if (data.containsKey(key))
+            return null // invalid database: keys are not unique
+        data[key] = value // new record
     }
     stream.close()
     return data.toMap()
