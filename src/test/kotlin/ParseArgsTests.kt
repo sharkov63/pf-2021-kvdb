@@ -31,110 +31,110 @@ internal class ParseArgsTests {
     }
 
 
-    /* Modify args */
+    /* Create args */
 
     @Test
-    fun parseCorrectModifyArgsTest() {
-        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key2", "value1"))
-        assertNotNull(modifyArgs)
-        assertEquals("database.db", modifyArgs.dbFileName)
-        assertEquals(mapOf("key1" to "value1", "key2" to "value1"), modifyArgs.dataToWrite)
+    fun parseCorrectCreateArgsTest() {
+        val createArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key2", "value1"))
+        assertNotNull(createArgs)
+        assertEquals("database.db", createArgs.dbFileName)
+        assertEquals(mapOf("key1" to "value1", "key2" to "value1"), createArgs.dataToWrite)
     }
 
     @Test
-    fun parseEqualKeysModifyArgsTest() {
-        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key1", "value2"))
-        assertNull(modifyArgs)
+    fun parseEqualKeysCreateArgsTest() {
+        val createArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key1", "value2"))
+        assertNull(createArgs)
     }
 
     @Test
-    fun parseEqualKeysAndValuesModifyArgsTest() {
-        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key1", "value1"))
-        assertNotNull(modifyArgs)
-        assertEquals("database.db", modifyArgs.dbFileName)
-        assertEquals(mapOf("key1" to "value1"), modifyArgs.dataToWrite)
+    fun parseEqualKeysAndValuesCreateArgsTest() {
+        val createArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key1", "value1"))
+        assertNotNull(createArgs)
+        assertEquals("database.db", createArgs.dbFileName)
+        assertEquals(mapOf("key1" to "value1"), createArgs.dataToWrite)
     }
 
     @Test
-    fun parseOddKeyValueArgsModifyArgsTest() {
-        val modifyArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key2"))
-        assertNull(modifyArgs)
+    fun parseOddKeyValueArgsCreateArgsTest() {
+        val createArgs = parseCreateArgs(listOf("database.db", "key1", "value1", "key2"))
+        assertNull(createArgs)
     }
 
     @Test
-    fun parseEmptyKeyValuesModifyArgsTest() {
-        val modifyArgs = parseCreateArgs(listOf("database.db"))
-        assertNotNull(modifyArgs)
-        assertEquals("database.db", modifyArgs.dbFileName)
-        assertEquals(mapOf(), modifyArgs.dataToWrite)
+    fun parseEmptyKeyValuesCreateArgsTest() {
+        val createArgs = parseCreateArgs(listOf("database.db"))
+        assertNotNull(createArgs)
+        assertEquals("database.db", createArgs.dbFileName)
+        assertEquals(mapOf(), createArgs.dataToWrite)
     }
 
     @Test
-    fun parseEmptyModifyArgsTest() {
-        val modifyArgs = parseCreateArgs(listOf())
-        assertNull(modifyArgs)
+    fun parseEmptyCreateArgsTest() {
+        val createArgs = parseCreateArgs(listOf())
+        assertNull(createArgs)
     }
 
 
-    /* Write args */
+    /* Add args */
 
     @Test
-    fun parseCorrectWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2", "value1"))
-        assertNotNull(writeArgs)
-        assertEquals("database1.db", writeArgs.originalDBFileName)
-        assertEquals("database2.db", writeArgs.newDBFileName)
-        assertEquals(mapOf("key1" to "value1", "key2" to "value1"), writeArgs.dataToWrite)
+    fun parseCorrectAddArgsTest() {
+        val addArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2", "value1"))
+        assertNotNull(addArgs)
+        assertEquals("database1.db", addArgs.originalDBFileName)
+        assertEquals("database2.db", addArgs.newDBFileName)
+        assertEquals(mapOf("key1" to "value1", "key2" to "value1"), addArgs.dataToWrite)
     }
 
     @Test
-    fun parseExclamationMarkWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf("database1.db", "!", "key1", "value1", "key2", "value1"))
-        assertNotNull(writeArgs)
-        assertEquals("database1.db", writeArgs.originalDBFileName)
-        assertEquals("database1.db", writeArgs.newDBFileName)
-        assertEquals(mapOf("key1" to "value1", "key2" to "value1"), writeArgs.dataToWrite)
+    fun parseExclamationMarkAddArgsTest() {
+        val addArgs = parseAddArgs(listOf("database1.db", "!", "key1", "value1", "key2", "value1"))
+        assertNotNull(addArgs)
+        assertEquals("database1.db", addArgs.originalDBFileName)
+        assertEquals("database1.db", addArgs.newDBFileName)
+        assertEquals(mapOf("key1" to "value1", "key2" to "value1"), addArgs.dataToWrite)
     }
 
     @Test
-    fun parseEqualKeysWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value2"))
-        assertNull(writeArgs)
+    fun parseEqualKeysAddArgsTest() {
+        val addArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value2"))
+        assertNull(addArgs)
     }
 
     @Test
-    fun parseEqualKeysAndValuesWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value1"))
-        assertNotNull(writeArgs)
-        assertEquals("database1.db", writeArgs.originalDBFileName)
-        assertEquals("database2.db", writeArgs.newDBFileName)
-        assertEquals(mapOf("key1" to "value1"), writeArgs.dataToWrite)
+    fun parseEqualKeysAndValuesAddArgsTest() {
+        val addArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key1", "value1"))
+        assertNotNull(addArgs)
+        assertEquals("database1.db", addArgs.originalDBFileName)
+        assertEquals("database2.db", addArgs.newDBFileName)
+        assertEquals(mapOf("key1" to "value1"), addArgs.dataToWrite)
     }
 
     @Test
-    fun parseOddKeyValueArgsWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2"))
-        assertNull(writeArgs)
+    fun parseOddKeyValueArgsAddArgsTest() {
+        val addArgs = parseAddArgs(listOf("database1.db", "database2.db", "key1", "value1", "key2"))
+        assertNull(addArgs)
     }
 
     @Test
-    fun parseEmptyKeyValuesWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf("database1.db", "database2.db"))
-        assertNotNull(writeArgs)
-        assertEquals("database1.db", writeArgs.originalDBFileName)
-        assertEquals("database2.db", writeArgs.newDBFileName)
-        assertEquals(mapOf(), writeArgs.dataToWrite)
+    fun parseEmptyKeyValuesAddArgsTest() {
+        val addArgs = parseAddArgs(listOf("database1.db", "database2.db"))
+        assertNotNull(addArgs)
+        assertEquals("database1.db", addArgs.originalDBFileName)
+        assertEquals("database2.db", addArgs.newDBFileName)
+        assertEquals(mapOf(), addArgs.dataToWrite)
     }
 
     @Test
-    fun parseOnlyOneFileWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf("database1.db"))
-        assertNull(writeArgs)
+    fun parseOnlyOneFileAddArgsTest() {
+        val addArgs = parseAddArgs(listOf("database1.db"))
+        assertNull(addArgs)
     }
 
     @Test
-    fun parseEmptyWriteArgsTest() {
-        val writeArgs = parseAddArgs(listOf())
-        assertNull(writeArgs)
+    fun parseEmptyAddArgsTest() {
+        val addArgs = parseAddArgs(listOf())
+        assertNull(addArgs)
     }
 }
