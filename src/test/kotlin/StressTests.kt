@@ -1,6 +1,8 @@
 import dbfile.*
+import java.io.ByteArrayOutputStream
 
 import java.io.File
+import java.io.PrintStream
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
@@ -12,6 +14,10 @@ private fun ensureAncestorDirectories(file: File) {
 }
 
 internal class StressTests {
+    private val stdout = System.out
+    private val noExitSecurityManager = NoExitSecurityManager()
+    private val tempStream = ByteArrayOutputStream()
+
     private val testPath = "testData/stressTests"
 
     private val testRecordCounts = listOf(
@@ -90,12 +96,49 @@ internal class StressTests {
     }
 
     //@Test
-    fun clearTestFolder() {
+    fun readOperation() {
+        System.setSecurityManager(noExitSecurityManager)
         for (testIndex in testNames.indices) {
+            val testName = testNames[testIndex]
             val fileName = testFileNames[testIndex]
             val filePath = "$testPath/$fileName"
-            val file = File(filePath)
-            file.delete()
+
+            System.setOut(PrintStream(tempStream))
+            val time = measureTimeMillis {
+                try {
+                    main(arrayOf("-r", filePath, genRandomString()))
+                } catch (exception: Exception) {
+
+                }
+            }
+            System.setOut(stdout)
+
+            println("Read operation on $testName: $time ms")
         }
+    }
+
+    //@Test
+    fun addOverwriteOperation() {
+        System.setSecurityManager(noExitSecurityManager)
+        for (testIndex in testNames.indices) {
+            val testName = testNames[testIndex]
+            val fileName = testFileNames[testIndex]
+            val filePath = "$testPath/$fileName"
+            val filePathNew = "$testPath/$testName-ao.db"
+
+            System.setOut(PrintStream(tempStream))
+            val time = measureTimeMillis {
+                main(arrayOf("-ao", filePath, filePathNew, genRandomString(), genRandomString()))
+            }
+            System.setOut(stdout)
+
+            println("Add overwrite operation on $testName: $time ms")
+        }
+    }
+
+    //@Test
+    fun deleteTestFolder() {
+        val folder = File(testPath)
+        folder.deleteRecursively()
     }
 }
