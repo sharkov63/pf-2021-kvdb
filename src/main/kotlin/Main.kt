@@ -24,6 +24,11 @@ fun delete(args: List<String>) {
     deleteKeysInDataBase(deleteArgs.originalDBFileName, deleteArgs.newDBFileName, deleteArgs.keys)
 }
 
+fun copy(args: List<String>) {
+    val copyArgs = parseCopyArgs(args) ?: return exitIncorrectArgs()
+    copyDataBase(copyArgs.fromDB, copyArgs.toDB)
+}
+
 fun parseOption(option: String, args: List<String>) {
     when (option) {
         "-r", "--read" -> read(args)
@@ -32,6 +37,7 @@ fun parseOption(option: String, args: List<String>) {
         "-a", "--add" -> add(args, false)
         "-ao", "--addo", "--addOverwrite" -> add(args, true)
         "-d", "--delete" -> delete(args)
+        "-cp", "--copy" -> copy(args)
         "-h", "--help" -> exitHelp()
         else -> exitIncorrectArgs()
     }

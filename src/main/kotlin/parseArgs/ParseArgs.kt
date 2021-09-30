@@ -126,3 +126,26 @@ fun parseDeleteArgs(args: List<String>): DeleteArgs? {
     val keys = args.drop(2)
     return DeleteArgs(originalDBFileName, newDBFileName, keys)
 }
+
+
+/**
+ * Copy args.
+ * The format is as follows:
+ *
+ * FROM_DATABASE_FILE TO_DATABASE_FILE
+ *
+ * TO_DATABASE_FILE might be equal to "!",
+ * in which case it is considered equal to FROM_DATABASE_FILE.
+ *
+ * Everything after TO_DATABASE_FILE is ignored.
+ */
+
+data class CopyArgs(val fromDB: String, val toDB: String)
+
+fun parseCopyArgs(args: List<String>): CopyArgs? {
+    if (args.size < 2)
+        return null
+    val fromDB = args[0]
+    val toDB = if (args[1] == "!") fromDB else args[1]
+    return CopyArgs(fromDB, toDB)
+}

@@ -181,3 +181,31 @@ fun deleteKeysInDataBase(originalDBFileName: String, newDBFileName: String, keys
         else -> "Database was not changed: no records were deleted."
     })
 }
+
+
+/**
+ * Copies database at [dbPath1] to the database at [dbPath2].
+ * Creates [dbPath2] (and all ancestor directories), if necessary.
+ *
+ * If paths are equals, calls [exitNothingToDo].
+ */
+fun copyDataBase(dbPath1: String, dbPath2: String) {
+    if (dbPath1 == dbPath2)
+        return exitNothingToDo()
+
+    val dbFile1 = File(dbPath1)
+    val dbFile2 = File(dbPath2)
+
+    if (!dbFile1.exists())
+        return exitDatabaseNotExist(dbFile1.path)
+    if (!dbFile1.canRead())
+        return exitCannotReadDataBase(dbFile1.path)
+
+    ensureFile(dbFile2)
+    if (!dbFile2.canWrite())
+        return exitCannotWriteToDataBase(dbFile2.path)
+
+    dbFile2.writeText(dbFile1.readText())
+
+    println("Successfully copied \"$dbFile1\" to \"$dbFile2\"")
+}

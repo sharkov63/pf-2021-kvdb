@@ -179,4 +179,35 @@ internal class ParseArgsTests {
         val deleteArgs = parseDeleteArgs(listOf())
         assertNull(deleteArgs)
     }
+
+
+    /* Copy args */
+
+    @Test
+    fun parseCorrectCopyArgs() {
+        val copyArgs = parseCopyArgs(listOf("database1.db", "database2.db"))
+        assertNotNull(copyArgs)
+        assertEquals("database1.db", copyArgs.fromDB)
+        assertEquals("database2.db", copyArgs.toDB)
+    }
+
+    @Test
+    fun parseExclamationMarkCopyArgs() {
+        val copyArgs = parseCopyArgs(listOf("database1.db", "!"))
+        assertNotNull(copyArgs)
+        assertEquals("database1.db", copyArgs.fromDB)
+        assertEquals("database1.db", copyArgs.toDB)
+    }
+
+    @Test
+    fun parseOnlyOneFileCopyArgsTest() {
+        val copyArgs = parseCopyArgs(listOf("database1.db"))
+        assertNull(copyArgs)
+    }
+
+    @Test
+    fun parseEmptyCopyArgsTest() {
+        val copyArgs = parseCopyArgs(listOf())
+        assertNull(copyArgs)
+    }
 }
