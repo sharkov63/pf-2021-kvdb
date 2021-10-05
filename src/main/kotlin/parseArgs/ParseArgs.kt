@@ -8,6 +8,33 @@ package parseArgs
  */
 
 
+/* Aux functions */
+
+private fun parseKeyValueSequence(kvArgs: List<String>): Map<String, String>? {
+    if (kvArgs.size % 2 == 1)
+        return null // Wrong parity
+
+    val data: MutableMap<String, String> = mutableMapOf()
+    for (i in kvArgs.indices step 2) {
+        val key = kvArgs[i]
+        val value = kvArgs[i + 1]
+        if (data.containsKey(key) && data[key] != value)
+            return null // Contradiction
+        data[key] = value
+    }
+    return data
+}
+
+private fun parseTwoDBFileNames(dbFileName1: String, dbFileName2: String): Pair<String, String> {
+    return Pair(
+        dbFileName1,
+        if (dbFileName2 != "!")
+            dbFileName2
+        else
+            dbFileName1
+    )
+}
+
 
 /**
  * Read args.
@@ -49,18 +76,8 @@ fun parseCreateArgs(args: List<String>): CreateArgs? {
         return null // Wrong parity
 
     val dbFileName = args[0]
-
-    val data: MutableMap<String, String> = mutableMapOf()
-    val kvArgs = args.drop(1)
-    for (i in kvArgs.indices step 2) {
-        val key = kvArgs[i]
-        val value = kvArgs[i + 1]
-        if (data.containsKey(key) && data[key] != value)
-            return null // Contradiction
-        data[key] = value
-    }
-
-    return CreateArgs(dbFileName, data.toMap())
+    val data = parseKeyValueSequence(args.drop(1)) ?: return null
+    return CreateArgs(dbFileName, data)
 }
 
 
@@ -86,20 +103,9 @@ fun parseAddArgs(args: List<String>): AddArgs? {
     if (args.size % 2 != 0)
         return null // Wrong parity
 
-    val originalDBFileName = args[0]
-    val newDBFileName = if (args[1] == "!") originalDBFileName else args[1]
-
-    val data: MutableMap<String, String> = mutableMapOf()
-    val kvArgs = args.drop(2)
-    for (i in kvArgs.indices step 2) {
-        val key = kvArgs[i]
-        val value = kvArgs[i + 1]
-        if (data.containsKey(key) && data[key] != value)
-            return null // Contradiction
-        data[key] = value
-    }
-
-    return AddArgs(originalDBFileName, newDBFileName, data.toMap())
+    val (originalDBFileName, newDBFileName) = parseTwoDBFileNames(args[0], args[1])
+    val data = parseKeyValueSequence(args.drop(2)) ?: return null
+    return AddArgs(originalDBFileName, newDBFileName, data)
 }
 
 
@@ -121,8 +127,7 @@ fun parseDeleteArgs(args: List<String>): DeleteArgs? {
     if (args.size < 2)
         return null
 
-    val originalDBFileName = args[0]
-    val newDBFileName = if (args[1] == "!") originalDBFileName else args[1]
+    val (originalDBFileName, newDBFileName) = parseTwoDBFileNames(args[0], args[1])
     val keys = args.drop(2)
     return DeleteArgs(originalDBFileName, newDBFileName, keys)
 }
@@ -145,7 +150,7 @@ data class CopyArgs(val fromDB: String, val toDB: String)
 fun parseCopyArgs(args: List<String>): CopyArgs? {
     if (args.size < 2)
         return null
-    val fromDB = args[0]
-    val toDB = if (args[1] == "!") fromDB else args[1]
+
+    val (fromDB, toDB) = parseTwoDBFileNames(args[0], args[1])
     return CopyArgs(fromDB, toDB)
 }

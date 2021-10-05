@@ -24,6 +24,28 @@ private fun ensureFile(file: File) {
     file.createNewFile()
 }
 
+private fun readDatabaseFromFileName(filename: String): Map<String, String> {
+    val file = File(filename)
+    if (!file.exists())
+        exitDatabaseNotExist(file.path)
+    if (!file.canRead())
+        exitCannotReadDataBase(file.path)
+    val data = readDatabaseFromFile(file)
+    if (data == null)
+        exitInvalidDatabase(file.path)
+    else
+        return data
+    throw Exception("exitInvalidDatabase() seemed not to exit the program!")
+}
+
+private fun writeToDatabaseByFileName(filename: String, data: Map<String, String>) {
+    val file = File(filename)
+    ensureFile(file)
+    if (!file.canWrite()) {
+        return exitCannotWriteToDataBase(file.path)
+    }
+    writeDatabaseToFile(file, data)
+}
 
 /**
  * Prints the values of [keys] in a database at [dbFileName]
@@ -36,17 +58,10 @@ private fun ensureFile(file: File) {
  * calls [exitDatabaseNotContainsKey] exit function.
  */
 fun readKeys(dbFileName: String, keys: List<String>) {
-    val dbFile = File(dbFileName)
-    if (!dbFile.exists()) {
-        return exitDatabaseNotExist(dbFile.path)
-    }
-    if (!dbFile.canRead()) {
-        return exitCannotReadDataBase(dbFile.path)
-    }
-    val data = readDatabaseFromFile(dbFile) ?: return exitInvalidDatabase(dbFile.path)
+    val data = readDatabaseFromFileName(dbFileName)
     keys.forEach { key ->
         if (!data.containsKey(key)) {
-            return exitDatabaseNotContainsKey(dbFile.path, key)
+            return exitDatabaseNotContainsKey(dbFileName, key)
         }
         println(data[key])
     }
@@ -65,10 +80,7 @@ fun createDataBase(dbFileName: String, data: Map<String, String>, overwrite: Boo
     if (!dbFile.createNewFile() && !overwrite) {
         return exitDataBaseAlreadyExists(dbFile.path)
     }
-    if (!dbFile.canWrite()) {
-        return exitCannotWriteToDataBase(dbFile.path)
-    }
-    writeDatabaseToFile(dbFile, data)
+    writeToDatabaseByFileName(dbFileName, data)
 }
 
 
@@ -90,50 +102,29 @@ fun addToDataBase(originalDBFileName: String, newDBFileName: String, dataToAdd: 
     if (dataToAdd.isEmpty() && originalDBFileName == newDBFileName)
         return exitNothingToDo()
 
-    val originalDBFile = File(originalDBFileName)
-    val newDBFile = File(newDBFileName)
+    val data = readDatabaseFromFileName(originalDBFileName)
+    val dataToWrite = if (!overwrite)
+        dataToAdd + data
+    else
+        data + dataToAdd
 
-    if (originalDBFileName != newDBFileName && !originalDBFile.exists())
-        return exitDatabaseNotExist(originalDBFile.path)
+    writeToDatabaseByFileName(newDBFileName, dataToWrite)
 
-    if (!originalDBFile.canRead())
-        return exitCannotReadDataBase(originalDBFile.path)
-
-    val data = readDatabaseFromFile(originalDBFile) ?: return exitInvalidDatabase(originalDBFile.path)
-
-    if (!overwrite) {
-        val dataToWrite = data + dataToAdd.filterKeys { key -> !data.containsKey(key) }
-        val omittedRecords = dataToAdd.count { (key, _) -> data.containsKey(key) }
-        val writtenRecords = dataToAdd.size - omittedRecords
-
-        ensureFile(newDBFile)
-        if (!newDBFile.canWrite()) {
-            return exitCannotWriteToDataBase(newDBFile.path)
-        }
-        writeDatabaseToFile(newDBFile, dataToWrite)
-
-        if (writtenRecords > 0)
-            println("Successfully written $writtenRecords records to database at \"${newDBFile.path}\".")
-        if (omittedRecords > 0)
-            println("$omittedRecords records were omitted, as database already contains their keys.")
-    } else {
-        val overwrittenRecords = dataToAdd.count { (key, _) -> data.containsKey(key) }
-        val writtenRecords = dataToAdd.size
-
-        ensureFile(newDBFile)
-        if (!newDBFile.canWrite()) {
-            return exitCannotWriteToDataBase(newDBFile.path)
-        }
-        writeDatabaseToFile(newDBFile, data + dataToAdd)
-
-        if (writtenRecords > 0)
-            println("Successfully written $writtenRecords records to database at \"${newDBFile.path}\".")
-        if (overwrittenRecords > 0)
-            println("$overwrittenRecords of those records overwrote the data.")
+    val overlappedRecords = dataToAdd.count { (key, _) -> data.containsKey(key) }
+    val writtenRecords = dataToAdd.size - if (!overwrite) overlappedRecords else 0
+    if (writtenRecords > 0)
+        println("Successfully written $writtenRecords records to database \"${newDBFileName}\".")
+    if (overlappedRecords > 0) {
+        println(
+            when (overwrite) {
+                false -> "$overlappedRecords records were omitted, as database already contains their keys."
+                true -> "$overlappedRecords of those records overwrote the data."
+            }
+        )
     }
 
     if (dataToAdd.isEmpty())
-        println("Successfully copied \"$originalDBFile\" to \"$newDBFile\"")
+        println("Successfully copied \"$originalDBFileName\" to \"$newDBFileName\"")
 }
 
 
@@ -154,32 +145,20 @@ fun deleteKeysInDataBase(originalDBFileName: String, newDBFileName: String, keys
     if (keys.isEmpty() && originalDBFileName == newDBFileName)
         return exitNothingToDo()
 
-    val originalDBFile = File(originalDBFileName)
-    val newDBFile = File(newDBFileName)
-
-    if (originalDBFileName != newDBFileName && !originalDBFile.exists())
-        return exitDatabaseNotExist(originalDBFile.path)
-
-    if (!originalDBFile.canRead())
-        return exitCannotReadDataBase(originalDBFile.path)
-
-
-    val data = readDatabaseFromFile(originalDBFile) ?: return exitInvalidDatabase(originalDBFile.path)
-    val setKeys = keys.toSet()
-    val dataToWrite = data.filterKeys { !setKeys.contains(it) }
+    val data = readDatabaseFromFileName(originalDBFileName)
+    val setOfKeys = keys.toSet()
+    val dataToWrite = data.filterKeys { !setOfKeys.contains(it) }
     val deletedRecords = data.size - dataToWrite.size
 
-    ensureFile(newDBFile)
-    if (!newDBFile.canWrite()) {
-        return exitCannotWriteToDataBase(newDBFile.path)
-    }
-    writeDatabaseToFile(newDBFile, dataToWrite)
+    writeToDatabaseByFileName(newDBFileName, dataToWrite)
 
-    println(when {
-        keys.isEmpty() -> "Successfully copied \"$originalDBFile\" to \"$newDBFile\""
-        deletedRecords > 0 -> "Successfully deleted $deletedRecords records."
-        else -> "Database was not changed: no records were deleted."
-    })
+    println(
+        when {
+            keys.isEmpty() -> "Successfully copied \"$originalDBFileName\" to \"$newDBFileName\""
+            deletedRecords > 0 -> "Successfully deleted $deletedRecords records."
+            else -> "Database was not changed: no records were deleted."
+        }
+    )
 }
 
 
@@ -193,19 +172,8 @@ fun copyDataBase(dbPath1: String, dbPath2: String) {
     if (dbPath1 == dbPath2)
         return exitNothingToDo()
 
-    val dbFile1 = File(dbPath1)
-    val dbFile2 = File(dbPath2)
+    val data = readDatabaseFromFileName(dbPath1)
+    writeToDatabaseByFileName(dbPath2, data)
 
-    if (!dbFile1.exists())
-        return exitDatabaseNotExist(dbFile1.path)
-    if (!dbFile1.canRead())
-        return exitCannotReadDataBase(dbFile1.path)
-
-    ensureFile(dbFile2)
-    if (!dbFile2.canWrite())
-        return exitCannotWriteToDataBase(dbFile2.path)
-
-    dbFile2.writeText(dbFile1.readText())
-
-    println("Successfully copied \"$dbFile1\" to \"$dbFile2\"")
+    println("Successfully copied \"$dbPath1\" to \"$dbPath2\"")
 }
