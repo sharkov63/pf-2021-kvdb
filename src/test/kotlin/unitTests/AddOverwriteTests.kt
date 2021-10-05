@@ -1,29 +1,31 @@
+package unitTests
+
 import dbfile.*
 import operations.*
 
 import java.io.File
 import kotlin.test.*
 
-internal class AddTests {
-    private val testDataDir = "testData/add"
+internal class AddOverwriteTests {
+    private val testDataDir = "testData/addOverwrite"
 
     // A test where no exitProcess() is called
-    private fun correctAddTestTemplate(testName: String, dataToAdd: Map<String, String>) {
+    private fun correctAddOverwriteTestTemplate(testName: String, dataToAdd: Map<String, String>) {
         val originalDBPath = "$testDataDir/$testName-original.db"
         val newDBPath = "$testDataDir/$testName.db"
         val correctDBPath = "$testDataDir/$testName-correct.db"
         val newDBFile = File(newDBPath)
         val correctDBFile = File(correctDBPath)
-        addToDataBase(originalDBPath, newDBPath, dataToAdd)
+        addToDataBase(originalDBPath, newDBPath, dataToAdd, true)
         assertEquals(readDatabaseFromFile(correctDBFile), readDatabaseFromFile(newDBFile))
         assert(newDBFile.delete())
     }
 
     // A test where exitProcess() should be called
-    private fun incorrectAddTestTemplate(testName: String, dataToAdd: Map<String, String>) {
+    private fun incorrectAddOverwriteTestTemplate(testName: String, dataToAdd: Map<String, String>) {
         val noExitSecurityManager = NoExitSecurityManager()
         System.setSecurityManager(noExitSecurityManager)
-        assertFails { correctAddTestTemplate(testName, dataToAdd) }
+        assertFails { correctAddOverwriteTestTemplate(testName, dataToAdd) }
     }
 
     @Test
@@ -40,7 +42,7 @@ internal class AddTests {
             "5" to "0",
             "8" to "10",
         )
-        correctAddTestTemplate(testName, dataToAdd)
+        correctAddOverwriteTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -55,7 +57,7 @@ internal class AddTests {
             "1" to "3",
             "3" to "10",
         )
-        correctAddTestTemplate(testName, dataToAdd)
+        correctAddOverwriteTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -72,7 +74,7 @@ internal class AddTests {
             "6" to "7",
             "4" to "4",
         )
-        correctAddTestTemplate(testName, dataToAdd)
+        correctAddOverwriteTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -83,7 +85,7 @@ internal class AddTests {
             "key" to "value"
         )
         val dataToAdd: Map<String, String> = mapOf()
-        correctAddTestTemplate(testName, dataToAdd)
+        correctAddOverwriteTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -94,7 +96,7 @@ internal class AddTests {
             "iwant" to "add",
             "some" to "data",
         )
-        correctAddTestTemplate(testName, dataToAdd)
+        correctAddOverwriteTestTemplate(testName, dataToAdd)
     }
 
     @Test
@@ -104,12 +106,12 @@ internal class AddTests {
             "1" to "1",
             "-1" to "test",
         )
-        incorrectAddTestTemplate(testName, dataToAdd)
+        incorrectAddOverwriteTestTemplate(testName, dataToAdd)
     }
 
     @Test
-    fun addToSameFile() {
-        val testName = "addToSameFile"
+    fun addOverwriteToSameFile() {
+        val testName = "addOverwriteToSameFile"
         val initialData = mapOf(
             "1" to "1",
             "2" to "2",
@@ -127,7 +129,7 @@ internal class AddTests {
         val dbFile = File(dbFileName)
         val correctDBFile = File(correctDBFileName)
         writeDatabaseToFile(dbFile, initialData)
-        addToDataBase(dbFileName, dbFileName, dataToAdd)
+        addToDataBase(dbFileName, dbFileName, dataToAdd, true)
         assertEquals(readDatabaseFromFile(correctDBFile), readDatabaseFromFile(dbFile))
         dbFile.delete()
         assert(!dbFile.exists())

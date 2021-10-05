@@ -1,12 +1,16 @@
-import dbfile.*
-import java.io.ByteArrayOutputStream
+package stressTests
 
+import dbfile.*
+import main
+
+import kotlin.test.*
+import unitTests.NoExitSecurityManager
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
-import kotlin.test.*
 
 private fun ensureAncestorDirectories(file: File) {
     val parentPath = Path.of(file.parent)
@@ -57,12 +61,10 @@ internal class StressTests {
             val value = genRandomString()
             data[key] = value
         }
-        return data.toMap()
+        return data
     }
 
-    // @Test is under comment so that by default running "all tests" gradle task would not run stress tests.
-
-    //@Test
+    @Test
     fun dbWrite() {
         for (testIndex in testNames.indices) {
             val testName = testNames[testIndex]
@@ -81,7 +83,7 @@ internal class StressTests {
         }
     }
 
-    //@Test
+    @Test
     fun dbRead() {
         for (testIndex in testNames.indices) {
             val testName = testNames[testIndex]
@@ -95,7 +97,7 @@ internal class StressTests {
         }
     }
 
-    //@Test
+    @Test
     fun readOperation() {
         System.setSecurityManager(noExitSecurityManager)
         for (testIndex in testNames.indices) {
@@ -117,7 +119,7 @@ internal class StressTests {
         }
     }
 
-    //@Test
+    @Test
     fun addOverwriteOperation() {
         System.setSecurityManager(noExitSecurityManager)
         for (testIndex in testNames.indices) {
@@ -136,7 +138,7 @@ internal class StressTests {
         }
     }
 
-    //@Test
+    @Test
     fun deleteTestFolder() {
         val folder = File(testPath)
         folder.deleteRecursively()

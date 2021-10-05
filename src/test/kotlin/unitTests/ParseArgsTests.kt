@@ -1,3 +1,5 @@
+package unitTests
+
 import parseArgs.*
 import kotlin.test.*
 
