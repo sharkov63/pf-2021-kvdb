@@ -29,23 +29,21 @@ fun copy(args: List<String>) {
     copyDataBase(copyArgs.fromDB, copyArgs.toDB)
 }
 
-fun parseOption(option: String, args: List<String>) {
-    when (option) {
-        "-r", "--read" -> read(args)
-        "-c", "--create" -> create(args, false)
-        "-co", "--createo", "--createOverwrite" -> create(args, true)
-        "-a", "--add" -> add(args, false)
-        "-ao", "--addo", "--addOverwrite" -> add(args, true)
-        "-d", "--delete" -> delete(args)
-        "-cp", "--copy" -> copy(args)
-        "-h", "--help" -> exitHelp()
-        else -> exitIncorrectArgs()
-    }
-}
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) return exitIncorrectArgs()
 
     val option = args.first()
-    parseOption(option, args.drop(1).toList())
+    val argsNoOption = args.drop(1).toList()
+    when (option) {
+        "-r", "--read" -> read(argsNoOption)
+        "-c", "--create" -> create(argsNoOption, false)
+        "-co", "--createo", "--createOverwrite" -> create(argsNoOption, true)
+        "-a", "--add" -> add(argsNoOption, false)
+        "-ao", "--addo", "--addOverwrite" -> add(argsNoOption, true)
+        "-d", "--delete" -> delete(argsNoOption)
+        "-cp", "--copy" -> copy(argsNoOption)
+        "-h", "--help" -> exitHelp()
+        else -> exitIncorrectArgs()
+    }
 }

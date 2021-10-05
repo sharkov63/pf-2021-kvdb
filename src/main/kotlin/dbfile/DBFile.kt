@@ -115,5 +115,5 @@ fun readDatabaseFromFile(file: File): Map<String, String>? {
         data[key] = value // new record
     }
     stream.close()
-    return data.toMap()
+    return data
 }
