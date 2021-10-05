@@ -34,6 +34,11 @@ fun copy(args: List<String>) {
     copyDataBase(copyArgs.fromDB, copyArgs.toDB)
 }
 
+fun merge(args: List<String>, overwrite: Boolean = false) {
+    val mergeArgs = parseMergeArgs(args) ?: return exitIncorrectArgs()
+    mergeDataBases(mergeArgs.db1, mergeArgs.db2, mergeArgs.dbOut, overwrite)
+}
+
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) return exitIncorrectArgs()
@@ -49,6 +54,8 @@ fun main(args: Array<String>) {
         "-ao", "--addo", "--addOverwrite" -> add(argsNoOption, true)
         "-d", "--delete" -> delete(argsNoOption)
         "-cp", "--copy" -> copy(argsNoOption)
+        "-m", "--merge" -> merge(argsNoOption, false)
+        "-mo", "--mergeo", "--mergeOverwrite" -> merge(argsNoOption, true)
         "-h", "--help" -> exitHelp()
         else -> exitIncorrectArgs()
     }

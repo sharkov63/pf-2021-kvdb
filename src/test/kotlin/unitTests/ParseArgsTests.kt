@@ -212,4 +212,52 @@ internal class ParseArgsTests {
         val copyArgs = parseCopyArgs(listOf())
         assertNull(copyArgs)
     }
+
+
+    /* Merge args */
+
+    @Test
+    fun parseCorrectMergeArgs() {
+        val mergeArgs = parseMergeArgs(listOf("database1.db", "database2.db", "database3.db"))
+        assertNotNull(mergeArgs)
+        assertEquals("database1.db", mergeArgs.db1)
+        assertEquals("database2.db", mergeArgs.db2)
+        assertEquals("database3.db", mergeArgs.dbOut)
+    }
+
+    @Test
+    fun parseExclamationMarkMergeArgs() {
+        val mergeArgs = parseMergeArgs(listOf("database1.db", "database2.db", "!"))
+        assertNotNull(mergeArgs)
+        assertEquals("database1.db", mergeArgs.db1)
+        assertEquals("database2.db", mergeArgs.db2)
+        assertEquals("database1.db", mergeArgs.dbOut)
+    }
+
+    @Test
+    fun parseDoubleExclamationMarkMergeArgs() {
+        val mergeArgs = parseMergeArgs(listOf("database1.db", "database2.db", "!!"))
+        assertNotNull(mergeArgs)
+        assertEquals("database1.db", mergeArgs.db1)
+        assertEquals("database2.db", mergeArgs.db2)
+        assertEquals("database2.db", mergeArgs.dbOut)
+    }
+
+    @Test
+    fun parseOnlyTwoFilesMergeArgsTest() {
+        val mergeArgs = parseMergeArgs(listOf("database1.db", "database2.db"))
+        assertNull(mergeArgs)
+    }
+
+    @Test
+    fun parseOnlyOneFileMergeArgsTest() {
+        val mergeArgs = parseMergeArgs(listOf("database1.db"))
+        assertNull(mergeArgs)
+    }
+
+    @Test
+    fun parseEmptyMergeArgsTest() {
+        val mergeArgs = parseMergeArgs(listOf())
+        assertNull(mergeArgs)
+    }
 }

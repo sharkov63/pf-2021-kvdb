@@ -154,3 +154,34 @@ fun parseCopyArgs(args: List<String>): CopyArgs? {
     val (fromDB, toDB) = parseTwoDBFileNames(args[0], args[1])
     return CopyArgs(fromDB, toDB)
 }
+
+
+/**
+ * Merge args.
+ * The format is as follows:
+ *
+ * FIRST_DATABASE_FILE SECOND_DATABASE_FILE RESULT_DATABASE_FILE
+ *
+ * If RESULT_DATABASE_FILE is equal to "!",
+ * it is considered equal to FIRST_DATABASE_FILE.
+ * If RESULT_DATABASE_FILE is equal to "!!",
+ * it is considered equal to SECOND_DATABASE_FILE.
+ *
+ * Everything after RESULT_DATABASE_FILE is ignored.
+ */
+
+data class MergeArgs(val db1: String, val db2: String, val dbOut: String)
+
+fun parseMergeArgs(args: List<String>): MergeArgs? {
+    if (args.size < 3)
+        return null
+
+    val db1 = args[0]
+    val db2 = args[1]
+    val dbOut = when (args[2]) {
+        "!" -> db1
+        "!!" -> db2
+        else -> args[2]
+    }
+    return MergeArgs(db1, db2, dbOut)
+}

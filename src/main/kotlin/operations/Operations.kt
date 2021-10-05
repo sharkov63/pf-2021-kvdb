@@ -201,3 +201,30 @@ fun copyDataBase(dbPath1: String, dbPath2: String) {
 
     println("Successfully copied \"$dbPath1\" to \"$dbPath2\"")
 }
+
+
+/**
+ * Merges databases [firstDBPath] and [secondDBPath], and writes result to database [outDBPath].
+ *
+ * If the records in databases contradict each other, it calls an exit function if [overwrite] is false,
+ * otherwise it overwrites records in [firstDBPath] with records in [secondDBPath].
+ *
+ * If [overwrite] is true, writes statistics of overwritten records to stdout.
+ */
+fun mergeDataBases(firstDBPath: String, secondDBPath: String, outDBPath: String, overwrite: Boolean = false) {
+    val data1 = readDatabaseFromFileName(firstDBPath)
+    val data2 = readDatabaseFromFileName(secondDBPath)
+
+    val overwrittenRecords = data2.count { (key, value) ->
+        data1.containsKey(key) && data1[key] != value
+    }
+    if (!overwrite && overwrittenRecords > 0) {
+        exitDatabasesContradictEachOther(firstDBPath, secondDBPath)
+    }
+
+    writeToDatabaseByFileName(outDBPath, data1 + data2)
+
+    println("Databases \"$firstDBPath\" and \"$secondDBPath\" are successfully merge into database \"$outDBPath\"")
+    if (overwrittenRecords > 0)
+        println("$overwrittenRecords original records were overwritten.")
+}
