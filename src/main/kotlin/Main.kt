@@ -9,6 +9,11 @@ fun read(args: List<String>) {
     readKeys(readArgs.dbFileName, readArgs.keys)
 }
 
+fun readFound(args: List<String>) {
+    val readArgs = parseReadArgs(args) ?: return exitIncorrectArgs()
+    readFoundKeys(readArgs.dbFileName, readArgs.keys)
+}
+
 fun create(args: List<String>, overwrite: Boolean = false) {
     val createArgs = parseCreateArgs(args) ?: return exitIncorrectArgs()
     createDataBase(createArgs.dbFileName, createArgs.dataToWrite, overwrite)
@@ -37,6 +42,7 @@ fun main(args: Array<String>) {
     val argsNoOption = args.drop(1).toList()
     when (option) {
         "-r", "--read" -> read(argsNoOption)
+        "-rf", "--readf", "--readFound" -> readFound(argsNoOption)
         "-c", "--create" -> create(argsNoOption, false)
         "-co", "--createo", "--createOverwrite" -> create(argsNoOption, true)
         "-a", "--add" -> add(argsNoOption, false)

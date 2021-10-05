@@ -47,6 +47,8 @@ private fun writeToDatabaseByFileName(filename: String, data: Map<String, String
     writeDatabaseToFile(file, data)
 }
 
+
+
 /**
  * Prints the values of [keys] in a database at [dbFileName]
  * to stdout, each value on a separate line.
@@ -64,6 +66,28 @@ fun readKeys(dbFileName: String, keys: List<String>) {
             return exitDatabaseNotContainsKey(dbFileName, key)
         }
         println(data[key])
+    }
+}
+
+
+/**
+ * Prints to stdout key-value pairs of those keys in [keys], which exist in [dbFileName].
+ * Each key-value pair is printed in two lines:
+ * first line contains the key string,
+ * the second line contains value string.
+ *
+ * If some key is not present in the database, it is skipped.
+ *
+ * If the database does not exist, cannot be read, or does not match the format,
+ * it calls a corresponding exit function.
+ */
+fun readFoundKeys(dbFileName: String, keys: List<String>) {
+    val data = readDatabaseFromFileName(dbFileName)
+    keys.forEach { key ->
+        if (data.containsKey(key)) {
+            println(key)
+            println(data[key])
+        }
     }
 }
 

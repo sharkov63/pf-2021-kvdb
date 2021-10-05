@@ -25,6 +25,7 @@ fun exitHelp() {
     println("                                                                               ")
     println("Possible options:                                                              ")
     println("-r database [key1] [key2] ...                      get values of specified keys")
+    println("-rf database [key1] [key2] ...      get values of those keys that present in db")
     println("-c database [key1] [value1] ...                           create a new database")
     println("                                                            with specified data")
     println("-co database [key1] [value1] ...              same as -c, but overwrite already")
@@ -69,7 +70,7 @@ fun exitInvalidDatabase(dbPath: String) {
 }
 
 fun exitDatabaseNotContainsKey(dbPath: String, key: String) {
-    println("Database at \"$dbPath\" doesn't contain the key \"$key\"!")
+    println("Database at \"$dbPath\" doesn't contain the key \"$key\"! Please use -rf to print all found records.")
     exitProcess(1)
 }
 
