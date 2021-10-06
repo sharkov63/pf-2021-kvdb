@@ -141,7 +141,7 @@ fun addToDataBase(originalDBFileName: String, newDBFileName: String, dataToAdd: 
     if (overlappedRecords > 0) {
         println(
             when (overwrite) {
-                false -> "$overlappedRecords records were omitted, as database already contains their keys."
+                false -> "$overlappedRecords records were omitted, as database already contains their keys. To allow overwriting, please use -ao or -addo or -addOverwrite."
                 true -> "$overlappedRecords of those records overwrote the data."
             }
         )
@@ -179,7 +179,7 @@ fun deleteKeysInDataBase(originalDBFileName: String, newDBFileName: String, keys
     println(
         when {
             keys.isEmpty() -> "Successfully copied \"$originalDBFileName\" to \"$newDBFileName\""
-            deletedRecords > 0 -> "Successfully deleted $deletedRecords records."
+            deletedRecords > 0 -> "Successfully deleted $deletedRecords of original records."
             else -> "Database was not changed: no records were deleted."
         }
     )
@@ -224,7 +224,7 @@ fun mergeDataBases(firstDBPath: String, secondDBPath: String, outDBPath: String,
 
     writeToDatabaseByFileName(outDBPath, data1 + data2)
 
-    println("Databases \"$firstDBPath\" and \"$secondDBPath\" are successfully merge into database \"$outDBPath\"")
+    println("Databases \"$firstDBPath\" and \"$secondDBPath\" are successfully merged into database \"$outDBPath\"")
     if (overwrittenRecords > 0)
-        println("$overwrittenRecords original records were overwritten.")
+        println("$overwrittenRecords of original records were overwritten.")
 }
